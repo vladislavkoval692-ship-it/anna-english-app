@@ -3,131 +3,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna's English School</title>
-    <!-- Подключаем Telegram WebApp SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Anna's English School — Панель управления</title>
     <style>
         :root {
-            --bg-color: #fdfbf7;
-            --text-color: #4a3e3d;
-            --accent-color: #c89d7c;
+            --bg-color: #f4f7f6;
             --card-bg: #ffffff;
-            --border-radius: 16px;
+            --primary: #4a90e2;
+            --primary-hover: #357abd;
+            --danger: #e74c3c;
+            --text: #2c3e50;
+            --border: #e1e8ed;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
+            color: var(--text);
             padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        /* Финансовые карточки */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Секция Студентов */
+        .section-box {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+        }
+
+        .section-box h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input, select, button {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 14px;
+            outline: none;
+        }
+
+        input {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* Список студентов */
+        .students-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .student-chip {
+            background: #eef5fc;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #d0e3f7;
+        }
+
+        /* Сетка Расписания (Дни недели) */
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .day-column {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
+        }
+
+        .day-header {
+            font-weight: bold;
+            font-size: 16px;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--bg-color);
+            display: flex;
+            justify-content: space-between;
             align-items: center;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 24px;
+        .lessons-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
         }
 
-        .header h1 {
-            font-size: 22px;
-            margin: 8px 0 4px;
-            font-weight: 600;
-            letter-spacing: 1px;
+        .lesson-card {
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .header p {
+        .lesson-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .lesson-time {
+            font-weight: bold;
             font-size: 13px;
-            color: #8c7a6b;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
+            color: var(--primary);
         }
 
-        .card-grid {
-            width: 100%;
-            max-width: 400px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
+        .lesson-student {
+            font-size: 14px;
         }
 
-        .card {
-            background: var(--card-bg);
-            padding: 16px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 15px rgba(200, 157, 124, 0.08);
-            border: 1px solid rgba(200, 157, 124, 0.15);
-            text-align: center;
-        }
-
-        .card h3 {
-            margin: 0;
-            font-size: 24px;
-            color: var(--accent-color);
-        }
-
-        .card p {
-            margin: 4px 0 0;
+        .lesson-price {
             font-size: 12px;
-            color: #7a6e65;
-        }
-
-        .main-btn {
-            width: 100%;
-            max-width: 400px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: var(--border-radius);
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(200, 157, 124, 0.3);
-            transition: transform 0.1s ease;
-        }
-
-        .main-btn:active {
-            transform: scale(0.98);
+            color: #7f8c8d;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <p>Learn • Grow • Connect</p>
-        <h1>ANNA'S ENGLISH SCHOOL</h1>
+    <header>
+        <h1>Anna's English School</h1>
+        <p>Панель управления расписанием и финансами</p>
+    </header>
+
+    <!-- Финансовый отчёт -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Уроков на неделе</h3>
+            <div class="value" id="totalLessonsWeek">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Доход за неделю</h3>
+            <div class="value" id="incomeWeek">0 ₴</div>
+        </div>
+        <div class="stat-card">
+            <h3>Доход за месяц (прогноз)</h3>
+            <div class="value" id="incomeMonth">0 ₴</div>
+        </div>
     </div>
 
-    <div class="card-grid">
-        <div class="card">
-            <h3 id="student-count">0</h3>
-            <p>Студентов</p>
+    <!-- Управление Студентами -->
+    <div class="section-box">
+        <h2>Добавить нового студента</h2>
+        <div class="form-row">
+            <input type="text" id="studentName" placeholder="Имя студента">
+            <input type="number" id="studentRate" placeholder="Ставка за урок (₴)">
+            <button onclick="addStudent()">Сохранить студента</button>
         </div>
-        <div class="card">
-            <h3 id="lesson-count">0</h3>
-            <p>Уроков сегодня</p>
+        <div class="students-list" id="studentsList"></div>
+    </div>
+
+    <!-- Форма добавления урока -->
+    <div class="section-box">
+        <h2>Запланировать урок</h2>
+        <div class="form-row">
+            <select id="lessonDay">
+                <option value="Понедельник">Понедельник</option>
+                <option value="Вторник">Вторник</option>
+                <option value="Среда">Среда</option>
+                <option value="Четверг">Четверг</option>
+                <option value="Пятница">Пятница</option>
+                <option value="Суббота">Суббота</option>
+                <option value="Воскресенье">Воскресенье</option>
+            </select>
+            <input type="time" id="lessonTime" value="15:00">
+            <select id="lessonStudentSelect">
+                <option value="">Выберите студента</option>
+            </select>
+            <button onclick="addLesson()">+ Добавить в расписание</button>
         </div>
     </div>
 
-    <button class="main-btn" onclick="addLesson()">➕ Добавить урок</button>
+    <!-- Расписание по дням -->
+    <h2 style="margin-bottom: 15px;">Расписание на неделю</h2>
+    <div class="week-grid" id="weekGrid"></div>
 
     <script>
-        // Инициализируем Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем на весь экран
+        const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
+        
+        let students = JSON.parse(localStorage.getItem('anna_students')) || [];
+        let lessons = JSON.parse(localStorage.getItem('anna_lessons')) || [];
+
+        function saveData() {
+            localStorage.setItem('anna_students', JSON.stringify(students));
+            localStorage.setItem('anna_lessons', JSON.stringify(lessons));
+            render();
+        }
+
+        function addStudent() {
+            const name = document.getElementById('studentName').value.trim();
+            const rate = parseFloat(document.getElementById('studentRate').value);
+
+            if (!name || isNaN(rate)) {
+                alert('Заполните имя и ставку за урок!');
+                return;
+            }
+
+            students.push({ id: Date.now(), name, rate });
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentRate').value = '';
+            saveData();
+        }
+
+        function deleteStudent(id) {
+            students = students.filter(s => s.id !== id);
+            saveData();
+        }
 
         function addLesson() {
-            // Отправляем обратную связь в виде вибрации
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('medium');
+            const day = document.getElementById('lessonDay').value;
+            const time = document.getElementById('lessonTime').value;
+            const studentId = parseInt(document.getElementById('lessonStudentSelect').value);
+
+            if (!studentId) {
+                alert('Выберите студента из списка!');
+                return;
             }
-            tg.showAlert("Здесь откроется форма добавления урока!");
+
+            const student = students.find(s => s.id === studentId);
+
+            lessons.push({
+                id: Date.now(),
+                day,
+                time,
+                studentName: student.name,
+                rate: student.rate
+            });
+
+            saveData();
         }
+
+        function deleteLesson(id) {
+            lessons = lessons.filter(l => l.id !== id);
+            saveData();
+        }
+
+        function render() {
+            // Вывод списка студентов
+            const studentsListEl = document.getElementById('studentsList');
+            const studentSelectEl = document.getElementById('lessonStudentSelect');
+            
+            studentsListEl.innerHTML = '';
+            studentSelectEl.innerHTML = '<option value="">Выберите студента</option>';
+
+            students.forEach(s => {
+                studentsListEl.innerHTML += `
+                    <div class="student-chip">
+                        <b>${s.name}</b> (${s.rate} ₴/урок)
+                        <button class="btn-danger" onclick="deleteStudent(${s.id})">✕</button>
+                    </div>
+                `;
+                studentSelectEl.innerHTML += `<option value="${s.id}">${s.name} (${s.rate} ₴)</option>`;
+            });
+
+            // Рендер сетки дней
+            const weekGridEl = document.getElementById('weekGrid');
+            weekGridEl.innerHTML = '';
+
+            let totalWeekIncome = 0;
+
+            days.forEach(day => {
+                const dayLessons = lessons
+                    .filter(l => l.day === day)
+                    .sort((a, b) => a.time.localeCompare(b.time));
+
+                let lessonsHtml = '';
+                dayLessons.forEach(l => {
+                    totalWeekIncome += l.rate;
+                    lessonsHtml += `
+                        <div class="lesson-card">
+                            <div class="lesson-info">
+                                <span class="lesson-time">${l.time}</span>
+                                <span class="lesson-student">${l.studentName}</span>
+                                <span class="lesson-price">${l.rate} ₴</span>
+                            </div>
+                            <button class="btn-danger" onclick="deleteLesson(${l.id})">Отменить</button>
+                        </div>
+                    `;
+                });
+
+                weekGridEl.innerHTML += `
+                    <div class="day-column">
+                        <div class="day-header">
+                            <span>${day}</span>
+                            <small style="color: #7f8c8d; font-size:12px;">Уроков: ${dayLessons.length}</small>
+                        </div>
+                        <div class="lessons-list">
+                            ${lessonsHtml || '<p style="color:#bdc3c7; font-size:13px; text-align:center; padding: 10px;">Нет уроков</p>'}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Расчет статистики
+            document.getElementById('totalLessonsWeek').innerText = lessons.length;
+            document.getElementById('incomeWeek').innerText = `${totalWeekIncome} ₴`;
+            document.getElementById('incomeMonth').innerText = `${totalWeekIncome * 4} ₴`;
+        }
+
+        // Первоначальный рендер
+        render();
     </script>
 </body>
 </html>
