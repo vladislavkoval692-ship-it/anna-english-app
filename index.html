@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna's English School — Панель управления</title>
+    <title>Anna's English School — CRM</title>
+    <!-- Telegram Mini App Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-color: #f4f7f6;
             --card-bg: #ffffff;
             --primary: #4a90e2;
             --primary-hover: #357abd;
+            --success: #2ecc71;
             --danger: #e74c3c;
+            --zoom: #2D8CFF;
             --text: #2c3e50;
             --border: #e1e8ed;
         }
@@ -19,51 +23,64 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text);
-            padding: 20px;
+            padding: 15px;
         }
 
         header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         header h1 {
             color: var(--primary);
-            font-size: 28px;
+            font-size: 24px;
+        }
+
+        /* Настройки Zoom */
+        .zoom-settings {
+            background: #eef6ff;
+            border: 1px solid #b2d7ff;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
         /* Финансовые карточки */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
             background: var(--card-bg);
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             text-align: center;
             border: 1px solid var(--border);
         }
 
         .stat-card h3 {
-            font-size: 14px;
+            font-size: 12px;
             color: #7f8c8d;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             text-transform: uppercase;
         }
 
         .stat-card .value {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
             color: var(--primary);
         }
@@ -71,26 +88,26 @@
         /* Секция Студентов */
         .section-box {
             background: var(--card-bg);
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
             border: 1px solid var(--border);
         }
 
         .section-box h2 {
-            font-size: 18px;
-            margin-bottom: 15px;
+            font-size: 16px;
+            margin-bottom: 10px;
         }
 
         .form-row {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         input, select, button {
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 8px;
             border: 1px solid var(--border);
             font-size: 14px;
@@ -99,7 +116,7 @@
 
         input {
             flex: 1;
-            min-width: 150px;
+            min-width: 120px;
         }
 
         button {
@@ -112,7 +129,27 @@
         }
 
         button:hover {
-            background: var(--primary-hover);
+            opacity: 0.9;
+        }
+
+        .btn-zoom {
+            background: var(--zoom);
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: bold;
+        }
+
+        .btn-success {
+            background: var(--success);
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 6px;
         }
 
         .btn-danger {
@@ -122,62 +159,53 @@
             border-radius: 6px;
         }
 
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-
-        /* Список студентов */
         .students-list {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         .student-chip {
             background: #eef5fc;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
+            padding: 5px 10px;
+            border-radius: 16px;
+            font-size: 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             border: 1px solid #d0e3f7;
         }
 
-        /* Сетка Расписания (Дни недели) */
+        /* Расписание */
         .week-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
+            gap: 12px;
         }
 
         .day-column {
             background: var(--card-bg);
             border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             border: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
         }
 
         .day-header {
             font-weight: bold;
-            font-size: 16px;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
+            font-size: 15px;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
             border-bottom: 2px solid var(--bg-color);
             display: flex;
             justify-content: space-between;
-            align-items: center;
         }
 
         .lessons-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            flex-grow: 1;
+            gap: 8px;
         }
 
         .lesson-card {
@@ -186,14 +214,20 @@
             padding: 10px;
             border-radius: 6px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .lesson-info {
+        .lesson-card.completed {
+            border-left-color: var(--success);
+            opacity: 0.65;
+            background: #f0fff4;
+        }
+
+        .lesson-header-row {
             display: flex;
-            flex-direction: column;
-            gap: 2px;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .lesson-time {
@@ -202,13 +236,21 @@
             color: var(--primary);
         }
 
-        .lesson-student {
-            font-size: 14px;
+        .completed .lesson-time {
+            color: var(--success);
         }
 
-        .lesson-price {
-            font-size: 12px;
-            color: #7f8c8d;
+        .lesson-student {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .lesson-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 4px;
         }
     </style>
 </head>
@@ -216,37 +258,43 @@
 
     <header>
         <h1>Anna's English School</h1>
-        <p>Панель управления расписанием и финансами</p>
     </header>
 
-    <!-- Финансовый отчёт -->
+    <!-- Ссылка на Zoom -->
+    <div class="zoom-settings">
+        <label for="zoomUrl" style="font-size: 13px; font-weight: bold;">Ссылка на Zoom:</label>
+        <input type="text" id="zoomUrl" placeholder="https://zoom.us/j/your-link">
+        <button onclick="saveZoomUrl()">Сохранить</button>
+    </div>
+
+    <!-- Статистика -->
     <div class="stats-grid">
         <div class="stat-card">
-            <h3>Уроков на неделе</h3>
-            <div class="value" id="totalLessonsWeek">0</div>
+            <h3>Проведено уроков</h3>
+            <div class="value" id="completedLessonsCount">0 / 0</div>
         </div>
         <div class="stat-card">
-            <h3>Доход за неделю</h3>
-            <div class="value" id="incomeWeek">0 ₴</div>
+            <h3>Заработано</h3>
+            <div class="value" id="earnedIncome">0 ₴</div>
         </div>
         <div class="stat-card">
-            <h3>Доход за месяц (прогноз)</h3>
-            <div class="value" id="incomeMonth">0 ₴</div>
+            <h3>План на неделю</h3>
+            <div class="value" id="totalIncomeWeek">0 ₴</div>
         </div>
     </div>
 
-    <!-- Управление Студентами -->
+    <!-- Студенты -->
     <div class="section-box">
-        <h2>Добавить нового студента</h2>
+        <h2>Добавить студента</h2>
         <div class="form-row">
-            <input type="text" id="studentName" placeholder="Имя студента">
-            <input type="number" id="studentRate" placeholder="Ставка за урок (₴)">
-            <button onclick="addStudent()">Сохранить студента</button>
+            <input type="text" id="studentName" placeholder="Имя">
+            <input type="number" id="studentRate" placeholder="Ставка (₴)">
+            <button onclick="addStudent()">Добавить</button>
         </div>
         <div class="students-list" id="studentsList"></div>
     </div>
 
-    <!-- Форма добавления урока -->
+    <!-- Добавить урок -->
     <div class="section-box">
         <h2>Запланировать урок</h2>
         <div class="form-row">
@@ -263,19 +311,35 @@
             <select id="lessonStudentSelect">
                 <option value="">Выберите студента</option>
             </select>
-            <button onclick="addLesson()">+ Добавить в расписание</button>
+            <button onclick="addLesson()">+ Урок</button>
         </div>
     </div>
 
-    <!-- Расписание по дням -->
-    <h2 style="margin-bottom: 15px;">Расписание на неделю</h2>
+    <!-- Расписание -->
+    <h2 style="margin-bottom: 10px; font-size: 18px;">Расписание на неделю</h2>
     <div class="week-grid" id="weekGrid"></div>
 
     <script>
+        // Инициализация Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
         const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
         
         let students = JSON.parse(localStorage.getItem('anna_students')) || [];
         let lessons = JSON.parse(localStorage.getItem('anna_lessons')) || [];
+        let zoomUrl = localStorage.getItem('anna_zoom_url') || '';
+
+        document.getElementById('zoomUrl').value = zoomUrl;
+
+        function saveZoomUrl() {
+            zoomUrl = document.getElementById('zoomUrl').value.trim();
+            localStorage.setItem('anna_zoom_url', zoomUrl);
+            alert('Ссылка на Zoom сохранена!');
+            render();
+        }
 
         function saveData() {
             localStorage.setItem('anna_students', JSON.stringify(students));
@@ -288,7 +352,7 @@
             const rate = parseFloat(document.getElementById('studentRate').value);
 
             if (!name || isNaN(rate)) {
-                alert('Заполните имя и ставку за урок!');
+                alert('Заполните имя и ставку!');
                 return;
             }
 
@@ -309,7 +373,7 @@
             const studentId = parseInt(document.getElementById('lessonStudentSelect').value);
 
             if (!studentId) {
-                alert('Выберите студента из списка!');
+                alert('Выберите студента!');
                 return;
             }
 
@@ -320,10 +384,19 @@
                 day,
                 time,
                 studentName: student.name,
-                rate: student.rate
+                rate: student.rate,
+                completed: false
             });
 
             saveData();
+        }
+
+        function toggleLessonStatus(id) {
+            const lesson = lessons.find(l => l.id === id);
+            if (lesson) {
+                lesson.completed = !lesson.completed;
+                saveData();
+            }
         }
 
         function deleteLesson(id) {
@@ -332,7 +405,7 @@
         }
 
         function render() {
-            // Вывод списка студентов
+            // Список студентов
             const studentsListEl = document.getElementById('studentsList');
             const studentSelectEl = document.getElementById('lessonStudentSelect');
             
@@ -342,18 +415,20 @@
             students.forEach(s => {
                 studentsListEl.innerHTML += `
                     <div class="student-chip">
-                        <b>${s.name}</b> (${s.rate} ₴/урок)
+                        <b>${s.name}</b> (${s.rate} ₴)
                         <button class="btn-danger" onclick="deleteStudent(${s.id})">✕</button>
                     </div>
                 `;
                 studentSelectEl.innerHTML += `<option value="${s.id}">${s.name} (${s.rate} ₴)</option>`;
             });
 
-            // Рендер сетки дней
+            // Рендер дней
             const weekGridEl = document.getElementById('weekGrid');
             weekGridEl.innerHTML = '';
 
             let totalWeekIncome = 0;
+            let earnedIncome = 0;
+            let completedCount = 0;
 
             days.forEach(day => {
                 const dayLessons = lessons
@@ -363,14 +438,29 @@
                 let lessonsHtml = '';
                 dayLessons.forEach(l => {
                     totalWeekIncome += l.rate;
+                    if (l.completed) {
+                        earnedIncome += l.rate;
+                        completedCount++;
+                    }
+
+                    const zoomBtnHtml = zoomUrl 
+                        ? `<a href="${zoomUrl}" target="_blank" class="btn-zoom">🎥 Zoom</a>` 
+                        : '';
+
                     lessonsHtml += `
-                        <div class="lesson-card">
-                            <div class="lesson-info">
-                                <span class="lesson-time">${l.time}</span>
-                                <span class="lesson-student">${l.studentName}</span>
-                                <span class="lesson-price">${l.rate} ₴</span>
+                        <div class="lesson-card ${l.completed ? 'completed' : ''}">
+                            <div class="lesson-header-row">
+                                <span class="lesson-time">${l.time} ${l.completed ? '✓ Проведён' : ''}</span>
+                                <span style="font-size: 12px; color: #7f8c8d;">${l.rate} ₴</span>
                             </div>
-                            <button class="btn-danger" onclick="deleteLesson(${l.id})">Отменить</button>
+                            <div class="lesson-student">${l.studentName}</div>
+                            <div class="lesson-actions">
+                                ${zoomBtnHtml}
+                                <button class="${l.completed ? 'btn-danger' : 'btn-success'}" onclick="toggleLessonStatus(${l.id})">
+                                    ${l.completed ? 'Вернуть' : '✓ Завершить'}
+                                </button>
+                                <button class="btn-danger" onclick="deleteLesson(${l.id})">Удалить</button>
+                            </div>
                         </div>
                     `;
                 });
@@ -379,22 +469,21 @@
                     <div class="day-column">
                         <div class="day-header">
                             <span>${day}</span>
-                            <small style="color: #7f8c8d; font-size:12px;">Уроков: ${dayLessons.length}</small>
+                            <small style="color: #7f8c8d; font-size:12px;">${dayLessons.length} ур.</small>
                         </div>
                         <div class="lessons-list">
-                            ${lessonsHtml || '<p style="color:#bdc3c7; font-size:13px; text-align:center; padding: 10px;">Нет уроков</p>'}
+                            ${lessonsHtml || '<p style="color:#bdc3c7; font-size:12px; text-align:center; padding: 5px;">Нет уроков</p>'}
                         </div>
                     </div>
                 `;
             });
 
-            // Расчет статистики
-            document.getElementById('totalLessonsWeek').innerText = lessons.length;
-            document.getElementById('incomeWeek').innerText = `${totalWeekIncome} ₴`;
-            document.getElementById('incomeMonth').innerText = `${totalWeekIncome * 4} ₴`;
+            // Статистика
+            document.getElementById('completedLessonsCount').innerText = `${completedCount} / ${lessons.length}`;
+            document.getElementById('earnedIncome').innerText = `${earnedIncome} ₴`;
+            document.getElementById('totalIncomeWeek').innerText = `${totalWeekIncome} ₴`;
         }
 
-        // Первоначальный рендер
         render();
     </script>
 </body>
