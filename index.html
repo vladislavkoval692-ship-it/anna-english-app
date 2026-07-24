@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna's English School v4</title>
+    <title>Anna's English School v5</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         // =========================================================
@@ -13,17 +13,18 @@
     </script>
     <style>
         :root {
-            --bg: #f8fafc;
+            --bg: #f1f5f9;
             --card-bg: #ffffff;
-            --primary: #3b82f6;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
             --success: #10b981;
             --danger: #ef4444;
-            --zoom: #2d8cff;
-            --ai-color: #8b5cf6;
+            --zoom: #0284c7;
+            --ai-color: #7c3aed;
             --text-main: #0f172a;
             --text-sub: #64748b;
             --border: #e2e8f0;
-            --radius: 14px;
+            --radius: 16px;
         }
 
         * {
@@ -36,8 +37,8 @@
         body {
             background-color: var(--bg);
             color: var(--text-main);
-            padding: 12px;
-            padding-bottom: 40px;
+            padding: 14px;
+            padding-bottom: 50px;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -46,47 +47,59 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding: 4px 2px;
+            margin-bottom: 14px;
         }
 
         .app-title {
-            font-size: 18px;
+            font-size: 19px;
             font-weight: 800;
             color: var(--text-main);
-            letter-spacing: -0.3px;
+            letter-spacing: -0.4px;
         }
 
         .header-actions {
             display: flex;
             gap: 6px;
+            align-items: center;
+        }
+
+        .btn-zoom-main {
+            background: #e0f2fe;
+            color: var(--zoom);
+            border: 1px solid #bae6fd;
+            padding: 7px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
         }
 
         .btn-icon-top {
             background: var(--card-bg);
             border: 1px solid var(--border);
             color: var(--text-main);
-            padding: 6px 10px;
-            border-radius: 10px;
-            font-size: 12px;
+            padding: 7px 10px;
+            border-radius: 12px;
+            font-size: 13px;
             font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
             cursor: pointer;
             box-shadow: 0 1px 2px rgba(0,0,0,0.03);
         }
 
-        /* --- ZOOM BAR --- */
+        /* --- ZOOM MODAL / INPUT --- */
         .zoom-bar {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            padding: 8px 12px;
-            border-radius: 12px;
-            margin-bottom: 12px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            border-radius: 14px;
+            margin-bottom: 14px;
             display: none;
             gap: 8px;
             align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
         .zoom-bar.active {
@@ -94,54 +107,55 @@
         }
 
         .zoom-bar input {
-            font-size: 12px;
-            padding: 6px 10px;
+            font-size: 13px;
+            padding: 8px 10px;
         }
 
         /* --- СТАТИСТИКА 2x2 --- */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 14px;
+            gap: 10px;
+            margin-bottom: 16px;
         }
 
         .stat-card {
             background: var(--card-bg);
-            padding: 10px 12px;
+            padding: 12px 14px;
             border-radius: var(--radius);
             border: 1px solid var(--border);
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
         .stat-card h3 {
-            font-size: 10px;
+            font-size: 11px;
             text-transform: uppercase;
             color: var(--text-sub);
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            font-weight: 600;
         }
 
         .stat-card .value {
-            font-size: 15px;
-            font-weight: 700;
+            font-size: 17px;
+            font-weight: 800;
             color: var(--text-main);
         }
 
         /* --- СЕКЦИИ --- */
         .section-box {
             background: var(--card-bg);
-            padding: 14px;
+            padding: 16px;
             border-radius: var(--radius);
             border: 1px solid var(--border);
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
 
         .section-title {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             color: var(--text-main);
         }
 
@@ -150,7 +164,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .form-grid.full {
@@ -159,18 +173,19 @@
 
         .form-actions {
             display: flex;
-            gap: 6px;
+            gap: 8px;
         }
 
         input, select {
             width: 100%;
-            padding: 9px 11px;
-            border-radius: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
             border: 1px solid var(--border);
             background: #f8fafc;
             font-size: 13px;
             color: var(--text-main);
             outline: none;
+            -webkit-appearance: none;
         }
 
         input:focus, select:focus {
@@ -179,8 +194,8 @@
         }
 
         button {
-            padding: 9px 14px;
-            border-radius: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
             border: none;
             font-size: 13px;
             font-weight: 600;
@@ -200,14 +215,14 @@
             background: #f1f5f9;
             color: var(--ai-color);
             border: 1px solid var(--border);
-            width: 38px;
-            height: 38px;
+            width: 40px;
+            height: 40px;
             padding: 0;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 17px;
             flex-shrink: 0;
         }
 
@@ -229,12 +244,12 @@
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
-            margin-top: 10px;
+            margin-top: 12px;
         }
 
         .student-chip {
             background: #f1f5f9;
-            padding: 4px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 12px;
             display: inline-flex;
@@ -255,13 +270,13 @@
         .week-grid {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .day-column {
             background: var(--card-bg);
             border-radius: var(--radius);
-            padding: 12px;
+            padding: 14px;
             border: 1px solid var(--border);
         }
 
@@ -271,7 +286,7 @@
             color: var(--text-sub);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
         }
@@ -279,15 +294,15 @@
         .lessons-list {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
 
         .lesson-card {
             background: #f8fafc;
             border: 1px solid var(--border);
             border-left: 4px solid var(--primary);
-            padding: 8px 10px;
-            border-radius: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -321,23 +336,23 @@
 
         .lesson-actions {
             display: flex;
-            gap: 4px;
+            gap: 6px;
             align-items: center;
         }
 
         .btn-sm {
-            padding: 4px 8px;
+            padding: 5px 9px;
             font-size: 11px;
-            border-radius: 6px;
+            border-radius: 8px;
         }
 
         .btn-zoom-icon {
-            background: #eff6ff;
+            background: #e0f2fe;
             color: var(--zoom);
-            border: 1px solid #bfdbfe;
+            border: 1px solid #bae6fd;
             text-decoration: none;
-            padding: 4px 8px;
-            border-radius: 6px;
+            padding: 5px 9px;
+            border-radius: 8px;
             font-size: 11px;
             font-weight: 700;
         }
@@ -350,17 +365,18 @@
 
     <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
     <header class="app-header">
-        <div class="app-title">Anna's English</div>
+        <div class="app-title">Anna's English School</div>
         <div class="header-actions">
-            <button class="btn-icon-top" onclick="toggleZoomInput()">🎥 Zoom</button>
+            <button class="btn-zoom-main" onclick="openZoomLink()">🎥 Zoom</button>
+            <button class="btn-icon-top" onclick="toggleZoomInput()" title="Настроить ссылку Zoom">⚙️</button>
             <button class="btn-icon-top" onclick="requestNotificationPermission()">🔔</button>
         </div>
     </header>
 
-    <!-- Zoom Панель -->
+    <!-- Настройка ссылки Zoom -->
     <div class="zoom-bar" id="zoomBar">
-        <input type="text" id="zoomUrl" placeholder="Вставьте ссылку Zoom...">
-        <button class="btn-primary" style="padding: 6px 12px; font-size:12px;" onclick="saveZoomUrl()">ОК</button>
+        <input type="text" id="zoomUrl" placeholder="Вставьте ссылку на Zoom...">
+        <button class="btn-primary" style="padding: 8px 12px; font-size:12px;" onclick="saveZoomUrl()">Сохранить</button>
     </div>
 
     <!-- СТАТИСТИКА -->
@@ -370,16 +386,16 @@
             <div class="value" id="completedLessonsCount">0 / 0</div>
         </div>
         <div class="stat-card">
-            <h3>Часов</h3>
-            <div class="value" id="completedHoursCount">0 ч.</div>
+            <h3>Уроки сегодня</h3>
+            <div class="value" id="todayLessonsCount">0</div>
+        </div>
+        <div class="stat-card">
+            <h3>Всего студентов</h3>
+            <div class="value" id="totalStudentsCount">0</div>
         </div>
         <div class="stat-card">
             <h3>Заработано</h3>
             <div class="value" id="earnedIncome">0 ₴</div>
-        </div>
-        <div class="stat-card">
-            <h3>Ожидается</h3>
-            <div class="value" id="pendingIncome">0 ₴</div>
         </div>
     </div>
 
@@ -424,7 +440,7 @@
     </div>
 
     <!-- РАСПИСАНИЕ -->
-    <div class="section-title" style="margin: 16px 2px 8px 2px;">Расписание на неделю</div>
+    <div class="section-title" style="margin: 18px 2px 10px 2px;">Расписание на неделю</div>
     <div class="week-grid" id="weekGrid"></div>
 
     <script>
@@ -444,6 +460,15 @@
         function toggleZoomInput() {
             const bar = document.getElementById('zoomBar');
             bar.classList.toggle('active');
+        }
+
+        function openZoomLink() {
+            if (zoomUrl) {
+                window.open(zoomUrl, '_blank');
+            } else {
+                alert('Ссылка на Zoom ещё не добавлена. Нажмите на ⚙️ чтобы вставить ссылку!');
+                toggleZoomInput();
+            }
         }
 
         function loadCloudData() {
@@ -488,6 +513,7 @@
                 localStorage.setItem('anna_zoom_url', zoomUrl);
             }
             document.getElementById('zoomBar').classList.remove('active');
+            alert('Ссылка Zoom успешно сохранена!');
             render();
         }
 
@@ -751,21 +777,28 @@
             weekGridEl.innerHTML = '';
 
             let earnedIncomeVal = 0;
-            let pendingIncomeVal = 0;
             let completedCount = 0;
+
+            // Определяем текущий день недели
+            const now = new Date();
+            const currentDayIdx = (now.getDay() + 6) % 7; // 0 - Понедельник
+            const todayName = days[currentDayIdx];
+            let todayLessonsCountVal = 0;
 
             days.forEach(day => {
                 const dayLessons = lessons
                     .filter(l => l.day === day)
                     .sort((a, b) => a.time.localeCompare(b.time));
 
+                if (day === todayName) {
+                    todayLessonsCountVal = dayLessons.length;
+                }
+
                 let lessonsHtml = '';
                 dayLessons.forEach(l => {
                     if (l.completed) {
                         earnedIncomeVal += l.rate;
                         completedCount++;
-                    } else {
-                        pendingIncomeVal += l.rate;
                     }
 
                     const zoomBtnHtml = zoomUrl 
@@ -792,7 +825,7 @@
                 weekGridEl.innerHTML += `
                     <div class="day-column">
                         <div class="day-header">
-                            <span>${day}</span>
+                            <span>${day} ${day === todayName ? '• Сегодня' : ''}</span>
                             <span>${dayLessons.length} ур.</span>
                         </div>
                         <div class="lessons-list">
@@ -803,9 +836,9 @@
             });
 
             document.getElementById('completedLessonsCount').innerText = `${completedCount} / ${lessons.length}`;
-            document.getElementById('completedHoursCount').innerText = `${completedCount} ч.`;
+            document.getElementById('todayLessonsCount').innerText = `${todayLessonsCountVal}`;
+            document.getElementById('totalStudentsCount').innerText = `${students.length}`;
             document.getElementById('earnedIncome').innerText = `${earnedIncomeVal} ₴`;
-            document.getElementById('pendingIncome').innerText = `${pendingIncomeVal} ₴`;
         }
 
         loadCloudData();
