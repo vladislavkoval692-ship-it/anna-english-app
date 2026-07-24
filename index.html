@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna's English School v3</title>
+    <title>Anna's English School v4</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         // =========================================================
         // 🔑 ВСТАВЬ СВОЙ КЛЮЧ GROQ МЕЖДУ КОВЫЧКАМИ НИЖЕ:
         // =========================================================
-        const GROQ_API_KEY = "gsk_eSdUfc3wqNfiDXqbGs2jWGdyb3" + "FYfzEaL2rTWZUHK890HX92ICXE"; 
+        const GROQ_API_KEY = "ВСТАВЬ_СЮДА_СВОЙ_КЛЮЧ_GROQ"; 
     </script>
     <style>
         :root {
             --bg: #f8fafc;
             --card-bg: #ffffff;
             --primary: #3b82f6;
-            --primary-hover: #2563eb;
             --success: #10b981;
             --danger: #ef4444;
             --zoom: #2d8cff;
@@ -42,7 +41,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- ВЕРХНЯЯ ПАНЕЛЬ (HEADER) --- */
+        /* --- ВЕРХНЯЯ ПАНЕЛЬ --- */
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -78,7 +77,7 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.03);
         }
 
-        /* --- ZOOM MODAL / POPUP PANEL --- */
+        /* --- ZOOM BAR --- */
         .zoom-bar {
             background: #eff6ff;
             border: 1px solid #bfdbfe;
@@ -99,7 +98,7 @@
             padding: 6px 10px;
         }
 
-        /* --- СТАТИСТИКА (2x2 GRID) --- */
+        /* --- СТАТИСТИКА 2x2 --- */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -129,7 +128,7 @@
             color: var(--text-main);
         }
 
-        /* --- БЛОКИ СЕКЦИЙ --- */
+        /* --- СЕКЦИИ --- */
         .section-box {
             background: var(--card-bg);
             padding: 14px;
@@ -146,7 +145,7 @@
             color: var(--text-main);
         }
 
-        /* --- ФОРМЫ ВВОДА --- */
+        /* --- ФОРМЫ --- */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -225,7 +224,7 @@
             100% { opacity: 1; }
         }
 
-        /* --- СТУДЕНТЫ (СПИСОК) --- */
+        /* --- СТУДЕНТЫ --- */
         .students-list {
             display: flex;
             gap: 6px;
@@ -252,7 +251,7 @@
             line-height: 1;
         }
 
-        /* --- РАСПИСАНИЕ НА НЕДЕЛЮ --- */
+        /* --- РАСПИСАНИЕ --- */
         .week-grid {
             display: flex;
             flex-direction: column;
@@ -358,13 +357,13 @@
         </div>
     </header>
 
-    <!-- Скрытая панель настройки Zoom -->
+    <!-- Zoom Панель -->
     <div class="zoom-bar" id="zoomBar">
         <input type="text" id="zoomUrl" placeholder="Вставьте ссылку Zoom...">
         <button class="btn-primary" style="padding: 6px 12px; font-size:12px;" onclick="saveZoomUrl()">ОК</button>
     </div>
 
-    <!-- СТАТИСТИКА 2х2 -->
+    <!-- СТАТИСТИКА -->
     <div class="stats-grid">
         <div class="stat-card">
             <h3>Проведено</h3>
@@ -379,8 +378,8 @@
             <div class="value" id="earnedIncome">0 ₴</div>
         </div>
         <div class="stat-card">
-            <h3>План недели</h3>
-            <div class="value" id="totalIncomeWeek">0 ₴</div>
+            <h3>Ожидается</h3>
+            <div class="value" id="pendingIncome">0 ₴</div>
         </div>
     </div>
 
@@ -751,8 +750,8 @@
             const weekGridEl = document.getElementById('weekGrid');
             weekGridEl.innerHTML = '';
 
-            let totalWeekIncome = 0;
-            let earnedIncome = 0;
+            let earnedIncomeVal = 0;
+            let pendingIncomeVal = 0;
             let completedCount = 0;
 
             days.forEach(day => {
@@ -762,10 +761,11 @@
 
                 let lessonsHtml = '';
                 dayLessons.forEach(l => {
-                    totalWeekIncome += l.rate;
                     if (l.completed) {
-                        earnedIncome += l.rate;
+                        earnedIncomeVal += l.rate;
                         completedCount++;
+                    } else {
+                        pendingIncomeVal += l.rate;
                     }
 
                     const zoomBtnHtml = zoomUrl 
@@ -804,8 +804,8 @@
 
             document.getElementById('completedLessonsCount').innerText = `${completedCount} / ${lessons.length}`;
             document.getElementById('completedHoursCount').innerText = `${completedCount} ч.`;
-            document.getElementById('earnedIncome').innerText = `${earnedIncome} ₴`;
-            document.getElementById('totalIncomeWeek').innerText = `${totalIncomeWeek} ₴`;
+            document.getElementById('earnedIncome').innerText = `${earnedIncomeVal} ₴`;
+            document.getElementById('pendingIncome').innerText = `${pendingIncomeVal} ₴`;
         }
 
         loadCloudData();
