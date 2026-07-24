@@ -9,7 +9,7 @@
         // =========================================================
         // 🔑 ВСТАВЬ СВОЙ КЛЮЧ GROQ МЕЖДУ КОВЫЧКАМИ НИЖЕ:
         // =========================================================
-        const GROQ_API_KEY = "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"; 
+        const GROQ_API_KEY = "gsk_eSdUfc3wqNfiDXqbGs2jWGdyb3F" + "YfzEaL2rTWZUHK890HX92ICXE"; 
     </script>
     <style>
         :root {
@@ -120,12 +120,16 @@
         .section-box h2 {
             font-size: 16px;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .form-row {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         input, select, button {
@@ -152,18 +156,20 @@
 
         button:hover { opacity: 0.9; }
 
-        .btn-voice {
+        .btn-voice-inline {
             background: var(--ai-color);
             color: white;
-            display: flex;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            padding: 8px 14px;
-            border-radius: 8px;
         }
 
-        .btn-voice.recording {
+        .btn-voice-inline.recording {
             background: #c0392b;
             animation: pulse 1s infinite;
         }
@@ -260,100 +266,6 @@
         .completed .lesson-time { color: var(--success); }
         .lesson-student { font-size: 14px; font-weight: 500; }
         .lesson-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
-
-        /* ИИ ЧАТ АССИСТЕНТ */
-        .ai-fab {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--ai-color);
-            color: white;
-            font-size: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(142, 68, 173, 0.4);
-            cursor: pointer;
-            z-index: 999;
-            transition: transform 0.2s;
-        }
-
-        .ai-fab:hover { transform: scale(1.05); }
-
-        .ai-chat-window {
-            display: none;
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 350px;
-            max-width: 90vw;
-            height: 480px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            border: 1px solid var(--border);
-            flex-direction: column;
-            z-index: 1000;
-            overflow: hidden;
-        }
-
-        .ai-chat-header {
-            background: var(--ai-color);
-            color: white;
-            padding: 12px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        .ai-chat-messages {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            background: #fafafa;
-        }
-
-        .msg {
-            max-width: 80%;
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            line-height: 1.4;
-        }
-
-        .msg.user {
-            align-self: flex-end;
-            background: var(--primary);
-            color: white;
-            border-bottom-right-radius: 2px;
-        }
-
-        .msg.ai {
-            align-self: flex-start;
-            background: #eef2f7;
-            color: #2c3e50;
-            border-bottom-left-radius: 2px;
-        }
-
-        .ai-chat-input-row {
-            display: flex;
-            padding: 8px;
-            gap: 6px;
-            background: white;
-            border-top: 1px solid var(--border);
-        }
-
-        .ai-chat-input-row input {
-            flex: 1;
-        }
     </style>
 </head>
 <body>
@@ -397,6 +309,7 @@
         <div class="form-row">
             <input type="text" id="studentName" placeholder="Имя">
             <input type="number" id="studentRate" placeholder="Ставка (₴)">
+            <button class="btn-voice-inline" id="voiceStudentBtn" onclick="toggleVoiceTarget('student')" title="Надиктовать имя и ставку">🎤</button>
             <button onclick="addStudent()">Добавить</button>
         </div>
         <div class="students-list" id="studentsList"></div>
@@ -419,6 +332,7 @@
             <select id="lessonStudentSelect">
                 <option value="">Выберите студента</option>
             </select>
+            <button class="btn-voice-inline" id="voiceLessonBtn" onclick="toggleVoiceTarget('lesson')" title="Надиктовать день, время и имя">🎤</button>
             <button onclick="addLesson()">+ Урок</button>
         </div>
     </div>
@@ -426,24 +340,6 @@
     <!-- Расписание -->
     <h2 style="margin-bottom: 10px; font-size: 18px;">Расписание на неделю</h2>
     <div class="week-grid" id="weekGrid"></div>
-
-    <!-- КНОПКА И ОКНО ЧАТА ИИ АССИСТЕНТА -->
-    <div class="ai-fab" onclick="toggleAiChat()">🤖</div>
-
-    <div class="ai-chat-window" id="aiChatWindow">
-        <div class="ai-chat-header">
-            <span>🤖 AI Ассистент Анны</span>
-            <span style="cursor: pointer;" onclick="toggleAiChat()">✕</span>
-        </div>
-        <div class="ai-chat-messages" id="aiChatMessages">
-            <div class="msg ai">Привет, Анна! Я твой личный ИИ-ассистент. Скажи или напиши, что нужно сделать (например: "Сколько часов проведено?", "Добавь студентов Олег 600 и Анна 500", "Запланируй урок с Олегом во вторник в 16:00").</div>
-        </div>
-        <div class="ai-chat-input-row">
-            <input type="text" id="aiInput" placeholder="Спроси или прикажи..." onkeypress="if(event.key==='Enter') sendAiMessage()">
-            <button class="btn-voice" id="aiVoiceBtn" onclick="toggleAiVoice()">🎤</button>
-            <button onclick="sendAiMessage()">➤</button>
-        </div>
-    </div>
 
     <script>
         const tg = window.Telegram ? window.Telegram.WebApp : null;
@@ -604,26 +500,26 @@
         setInterval(checkUpcomingLessons, 30000);
 
         // =========================================================
-        // === ЛОГИКА ГОЛОСОВОГО ВВОДА ДЛЯ iOS (WHISPER API) ===
+        // === ЛОГИКА ГОЛОСОВОГО ВВОДА (WHISPER API ДЛЯ iOS) ===
         // =========================================================
         
         let mediaRecorder = null;
         let audioChunks = [];
-        let isAiRecording = false;
+        let activeVoiceTarget = null; // 'student' или 'lesson'
 
-        async function toggleAiVoice() {
-            if (isAiRecording) {
-                stopAiVoice();
+        async function toggleVoiceTarget(target) {
+            if (activeVoiceTarget === target) {
+                stopVoiceRecording();
             } else {
-                await startAiVoice();
+                if (activeVoiceTarget) stopVoiceRecording();
+                await startVoiceRecording(target);
             }
         }
 
-        async function startAiVoice() {
+        async function startVoiceRecording(target) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 
-                // Проверяем поддерживаемые кодеки для iOS
                 let options = {};
                 if (MediaRecorder.isTypeSupported('audio/mp4')) {
                     options = { mimeType: 'audio/mp4' };
@@ -633,47 +529,48 @@
 
                 mediaRecorder = new MediaRecorder(stream, options);
                 audioChunks = [];
+                activeVoiceTarget = target;
 
                 mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        audioChunks.push(event.data);
-                    }
+                    if (event.data.size > 0) audioChunks.push(event.data);
                 };
 
                 mediaRecorder.onstop = async () => {
                     const mimeType = mediaRecorder.mimeType || 'audio/mp4';
                     const audioBlob = new Blob(audioChunks, { type: mimeType });
-                    stream.getTracks().forEach(track => track.stop()); // Гасим микрофон
-                    await processAudioWithWhisper(audioBlob);
+                    stream.getTracks().forEach(track => track.stop());
+                    await processAudioWhisper(audioBlob, target);
                 };
 
                 mediaRecorder.start();
-                isAiRecording = true;
-                
-                const btn = document.getElementById('aiVoiceBtn');
+
+                const btn = (target === 'student') ? document.getElementById('voiceStudentBtn') : document.getElementById('voiceLessonBtn');
                 btn.classList.add('recording');
                 btn.innerText = '🔴';
             } catch (err) {
-                alert('Ошибка доступа к микрофону. Проверьте разрешения в настройках iPhone/Telegram.');
+                alert('Ошибка доступа к микрофону на iPhone. Проверьте разрешения!');
                 console.error(err);
             }
         }
 
-        function stopAiVoice() {
-            if (mediaRecorder && isAiRecording) {
+        function stopVoiceRecording() {
+            if (mediaRecorder && activeVoiceTarget) {
+                const target = activeVoiceTarget;
                 mediaRecorder.stop();
-                isAiRecording = false;
-                
-                const btn = document.getElementById('aiVoiceBtn');
+                activeVoiceTarget = null;
+
+                const btn = (target === 'student') ? document.getElementById('voiceStudentBtn') : document.getElementById('voiceLessonBtn');
                 btn.classList.remove('recording');
                 btn.innerText = '⏳';
             }
         }
 
-        async function processAudioWithWhisper(audioBlob) {
+        async function processAudioWhisper(audioBlob, target) {
+            const btn = (target === 'student') ? document.getElementById('voiceStudentBtn') : document.getElementById('voiceLessonBtn');
+
             if (!GROQ_API_KEY || GROQ_API_KEY.includes("ВСТАВЬ_СЮДА")) {
-                alert("Ошибка: Укажи GROQ_API_KEY в коде!");
-                document.getElementById('aiVoiceBtn').innerText = '🎤';
+                alert("Ошибка: Укажите GROQ_API_KEY в коде!");
+                btn.innerText = '🎤';
                 return;
             }
 
@@ -685,191 +582,67 @@
             try {
                 const response = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
                     method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${GROQ_API_KEY}`
-                    },
+                    headers: { "Authorization": `Bearer ${GROQ_API_KEY}` },
                     body: formData
                 });
 
                 const data = await response.json();
                 
                 if (data.text) {
-                    document.getElementById('aiInput').value = data.text;
-                    sendAiMessage();
+                    fillFieldsFromSpeech(data.text, target);
                 } else {
-                    alert("Не удалось распознать речь.");
+                    alert("Не удалось разобрать речь.");
                 }
             } catch (err) {
                 console.error("Ошибка сети Whisper:", err);
-                alert("Ошибка при отправке аудио на обработку.");
+                alert("Ошибка соединения при распознавании речи.");
             } finally {
-                document.getElementById('aiVoiceBtn').innerText = '🎤';
+                btn.innerText = '🎤';
             }
         }
 
-        // =========================================================
-        // === ДВИЖОК ИИ-ЧАТА ===
-        // =========================================================
+        function fillFieldsFromSpeech(text, target) {
+            const lower = text.toLowerCase();
 
-        function toggleAiChat() {
-            const win = document.getElementById('aiChatWindow');
-            win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
-        }
-
-        function appendMessage(sender, text) {
-            const container = document.getElementById('aiChatMessages');
-            const msg = document.createElement('div');
-            msg.className = `msg ${sender}`;
-            msg.innerText = text;
-            container.appendChild(msg);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ru-RU';
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function sendAiMessage() {
-            const input = document.getElementById('aiInput');
-            const text = input.value.trim();
-            if (!text) return;
-
-            appendMessage('user', text);
-            input.value = '';
-
-            setTimeout(() => {
-                const reply = processAiCommand(text);
-                appendMessage('ai', reply);
-                speakText(reply);
-            }, 300);
-        }
-
-        function processAiCommand(cmd) {
-            const lower = cmd.toLowerCase();
-
-            if (lower.includes('часов') || lower.includes('часа') || lower.includes('сколько уроков')) {
-                const completedCount = lessons.filter(l => l.completed).length;
-                const totalCount = lessons.length;
-                return `На этой неделе проведёно ${completedCount} часов (уроков) из ${totalCount} запланированных.`;
-            }
-
-            if (lower.includes('доход') || lower.includes('заработал') || lower.includes('деньги') || lower.includes('сколько денег')) {
-                const earned = lessons.filter(l => l.completed).reduce((sum, l) => sum + l.rate, 0);
-                const total = lessons.reduce((sum, l) => sum + l.rate, 0);
-                return `Вы уже заработали ${earned} ₴. Общий план на неделю: ${total} ₴.`;
-            }
-
-            if (lower.includes('кто мои студенты') || lower.includes('список студентов') || lower.includes('все студенты')) {
-                if (students.length === 0) return "Список студентов пока пуст.";
-                const list = students.map(s => `${s.name} (${s.rate} ₴)`).join(', ');
-                return `Ваши студенты: ${list}.`;
-            }
-
-            if (lower.includes('добав') && (lower.includes('студент') || lower.includes('ученик'))) {
-                let added = [];
-                let clean = lower.replace(/добавить|добавь|студентов|студента|ученика|ставка|ставкой|грн|гривен/g, '');
-                let parts = clean.split(/,|и|\./);
-
-                parts.forEach(p => {
-                    let rateMatch = p.match(/(\d{3,5})/);
-                    let rate = rateMatch ? parseInt(rateMatch[1]) : 500;
-                    let nameWords = p.replace(/\d+/g, '').trim().split(' ').filter(w => w.length > 1);
-                    if (nameWords.length > 0) {
-                        let name = nameWords[0].charAt(0).toUpperCase() + nameWords[0].slice(1);
-                        students.push({ id: Date.now() + Math.random(), name, rate });
-                        added.push(`${name} (${rate} ₴)`);
-                    }
-                });
-
-                if (added.length > 0) {
-                    saveData();
-                    return `Успешно добавлены студенты: ${added.join(', ')}.`;
+            if (target === 'student') {
+                // ПРИМЕР РЕЧИ: "Олег 600" или "Добавить студента Анна 500"
+                const rateMatch = lower.match(/(\d{3,5})/);
+                if (rateMatch) {
+                    document.getElementById('studentRate').value = rateMatch[1];
                 }
-            }
-
-            if (lower.includes('отмени') || lower.includes('удали урок')) {
-                let existing = students.find(s => lower.includes(s.name.toLowerCase()));
-                if (existing) {
-                    lessons = lessons.filter(l => l.studentName.toLowerCase() !== existing.name.toLowerCase());
-                    saveData();
-                    return `Уроки с ${existing.name} отменены.`;
+                
+                let words = lower.replace(/добавить|студента|ученика|ставка|ставкой|грн|гривен|\d+/g, '').trim().split(/\s+/);
+                let nameWords = words.filter(w => w.length > 1);
+                if (nameWords.length > 0) {
+                    let name = nameWords[0].charAt(0).toUpperCase() + nameWords[0].slice(1);
+                    document.getElementById('studentName').value = name;
                 }
-            }
-
-            if (lower.includes('проведен') || lower.includes('заверши') || lower.includes('прошел')) {
-                let existing = students.find(s => lower.includes(s.name.toLowerCase()));
-                if (existing) {
-                    let lesson = lessons.find(l => l.studentName.toLowerCase() === existing.name.toLowerCase() && !l.completed);
-                    if (lesson) {
-                        lesson.completed = true;
-                        saveData();
-                        return `Урок с ${existing.name} отмечен как проведённый!`;
-                    }
-                }
-            }
-
-            if (lower.includes('урок') || lower.includes('запланируй') || lower.includes('поставь')) {
+            } else if (target === 'lesson') {
+                // ПРИМЕР РЕЧИ: "Вторник 16:00 Олег" или "Запланируй на среду в 15:30 с Анной"
                 let foundDay = days.find(d => lower.includes(d.toLowerCase()));
                 if (!foundDay) {
                     const todayIdx = (new Date().getDay() + 6) % 7;
                     if (lower.includes('сегодня')) foundDay = days[todayIdx];
                     if (lower.includes('завтра')) foundDay = days[(todayIdx + 1) % 7];
                 }
-                if (!foundDay) foundDay = days[(new Date().getDay() + 6) % 7];
+                if (foundDay) {
+                    document.getElementById('lessonDay').value = foundDay;
+                }
 
-                let foundTime = "15:00";
-                const timeMatch = lower.match(/(\d{1,2})[:\s]?(\d{2})?/) || lower.match(/в\s(\d{1,2})/);
+                const timeMatch = lower.match(/(\d{1,2})[:\s](\d{2})/) || lower.match(/в\s(\d{1,2})/);
                 if (timeMatch) {
                     let h = parseInt(timeMatch[1]);
                     let m = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
                     if (h < 24) {
-                        foundTime = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                        document.getElementById('lessonTime').value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
                     }
                 }
 
-                let student = students.find(s => lower.includes(s.name.toLowerCase()));
-                if (!student) {
-                    let words = lower.split(' ').filter(w => w.length > 2);
-                    let stopWords = ["понедельник","вторник","среда","четверг","пятница","суббота","воскресенье","сегодня","завтра","урок","в","поставь","запланируй","добавь"];
-                    let nameCandidate = words.find(w => !stopWords.includes(w) && isNaN(w));
-                    let name = nameCandidate ? nameCandidate.charAt(0).toUpperCase() + nameCandidate.slice(1) : "Студент";
-                    student = { id: Date.now(), name, rate: 500 };
-                    students.push(student);
-                }
-
-                lessons.push({
-                    id: Date.now(),
-                    day: foundDay,
-                    time: foundTime,
-                    studentName: student.name,
-                    rate: student.rate,
-                    completed: false
-                });
-
-                saveData();
-                return `Запланирован урок: ${student.name}, ${foundDay} в ${foundTime}.`;
-            }
-
-            if (lower.includes('zoom') || lower.includes('зум')) {
-                let match = cmd.match(/(https?:\/\/[^\s]+)/);
-                if (match) {
-                    zoomUrl = match[0];
-                    if (tg && tg.CloudStorage) {
-                        tg.CloudStorage.setItem('anna_zoom_url', zoomUrl);
-                    } else {
-                        localStorage.setItem('anna_zoom_url', zoomUrl);
-                    }
-                    document.getElementById('zoomUrl').value = zoomUrl;
-                    render();
-                    return `Ссылка на Zoom обновлена!`;
+                let foundStudent = students.find(s => lower.includes(s.name.toLowerCase()));
+                if (foundStudent) {
+                    document.getElementById('lessonStudentSelect').value = foundStudent.id;
                 }
             }
-
-            return "Я поняла команду, но пока не могу её выполнить. Попробуй: 'Сколько часов проведено?', 'Запланируй урок с Олегом во вторник в 15:00' или 'Добавь студента Анна 600'.";
         }
 
         // RENDER
