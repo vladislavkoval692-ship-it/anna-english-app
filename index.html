@@ -3,174 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna's English School — Cloud CRM & Voice AI</title>
+    <title>Anna's English School v3</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         // =========================================================
         // 🔑 ВСТАВЬ СВОЙ КЛЮЧ GROQ МЕЖДУ КОВЫЧКАМИ НИЖЕ:
         // =========================================================
-        const GROQ_API_KEY = "gsk_eSdUfc3wqNfiDXqbGs2jWGdyb3F" + "YfzEaL2rTWZUHK890HX92ICXE"; 
+        const GROQ_API_KEY = "gsk_eSdUfc3wqNfiDXqbGs2jWGdyb3" + "FYfzEaL2rTWZUHK890HX92ICXE"; 
     </script>
     <style>
         :root {
-            --bg-color: #f4f7f6;
+            --bg: #f8fafc;
             --card-bg: #ffffff;
-            --primary: #4a90e2;
-            --primary-hover: #357abd;
-            --success: #2ecc71;
-            --danger: #e74c3c;
-            --zoom: #2D8CFF;
-            --text: #2c3e50;
-            --border: #e1e8ed;
-            --ai-color: #8e44ad;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --zoom: #2d8cff;
+            --ai-color: #8b5cf6;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+            --radius: 14px;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text);
-            padding: 15px;
-            padding-bottom: 80px;
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding: 12px;
+            padding-bottom: 40px;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        header h1 {
-            color: var(--primary);
-            font-size: 24px;
-        }
-
-        .top-bar {
+        /* --- ВЕРХНЯЯ ПАНЕЛЬ (HEADER) --- */
+        .app-header {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 4px 2px;
         }
 
-        .zoom-settings {
-            background: #eef6ff;
-            border: 1px solid #b2d7ff;
-            padding: 10px 15px;
+        .app-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-icon-top {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        /* --- ZOOM MODAL / POPUP PANEL --- */
+        .zoom-bar {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 8px 12px;
             border-radius: 12px;
-            flex: 1;
-            display: flex;
+            margin-bottom: 12px;
+            display: none;
             gap: 8px;
             align-items: center;
-            min-width: 250px;
         }
 
-        .notif-btn {
-            background: #f39c12;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
+        .zoom-bar.active {
+            display: flex;
         }
 
+        .zoom-bar input {
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+
+        /* --- СТАТИСТИКА (2x2 GRID) --- */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 14px;
         }
 
         .stat-card {
             background: var(--card-bg);
-            padding: 12px;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            text-align: center;
+            padding: 10px 12px;
+            border-radius: var(--radius);
             border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
         .stat-card h3 {
-            font-size: 11px;
-            color: #7f8c8d;
-            margin-bottom: 5px;
+            font-size: 10px;
             text-transform: uppercase;
+            color: var(--text-sub);
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
         }
 
         .stat-card .value {
-            font-size: 16px;
-            font-weight: bold;
-            color: var(--primary);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
         }
 
+        /* --- БЛОКИ СЕКЦИЙ --- */
         .section-box {
             background: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            padding: 14px;
+            border-radius: var(--radius);
             border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            margin-bottom: 14px;
         }
 
-        .section-box h2 {
-            font-size: 16px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        input, select, button {
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
+        .section-title {
             font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        /* --- ФОРМЫ ВВОДА --- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 9px 11px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            font-size: 13px;
+            color: var(--text-main);
             outline: none;
         }
 
-        input {
-            flex: 1;
-            min-width: 110px;
+        input:focus, select:focus {
+            border-color: var(--primary);
+            background: #ffffff;
         }
 
         button {
-            background: var(--primary);
-            color: white;
+            padding: 9px 14px;
+            border-radius: 10px;
             border: none;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
+            transition: opacity 0.15s;
         }
 
-        button:hover { opacity: 0.9; }
+        button:active { opacity: 0.8; }
 
-        .btn-voice-inline {
-            background: var(--ai-color);
+        .btn-primary {
+            background: var(--primary);
             color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 15px;
-            cursor: pointer;
+            flex: 1;
+        }
+
+        .btn-voice {
+            background: #f1f5f9;
+            color: var(--ai-color);
+            border: 1px solid var(--border);
+            width: 38px;
+            height: 38px;
+            padding: 0;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            border-radius: 10px;
+            font-size: 16px;
+            flex-shrink: 0;
         }
 
-        .btn-voice-inline.recording {
-            background: #c0392b;
+        .btn-voice.recording {
+            background: #fee2e2;
+            color: var(--danger);
+            border-color: #fca5a5;
             animation: pulse 1s infinite;
         }
 
@@ -180,117 +225,153 @@
             100% { opacity: 1; }
         }
 
-        .btn-zoom {
-            background: var(--zoom);
-            color: white;
-            text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-weight: bold;
-        }
-
-        .btn-success { background: var(--success); padding: 4px 8px; font-size: 12px; border-radius: 6px; }
-        .btn-danger { background: var(--danger); padding: 4px 8px; font-size: 12px; border-radius: 6px; }
-
+        /* --- СТУДЕНТЫ (СПИСОК) --- */
         .students-list {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
             margin-top: 10px;
         }
 
         .student-chip {
-            background: #eef5fc;
-            padding: 5px 10px;
-            border-radius: 16px;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 20px;
             font-size: 12px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
-            border: 1px solid #d0e3f7;
+            border: 1px solid var(--border);
         }
 
+        .student-chip .del-btn {
+            color: var(--text-sub);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        /* --- РАСПИСАНИЕ НА НЕДЕЛЮ --- */
         .week-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .day-column {
             background: var(--card-bg);
-            border-radius: 12px;
+            border-radius: var(--radius);
             padding: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             border: 1px solid var(--border);
         }
 
         .day-header {
-            font-weight: bold;
-            font-size: 15px;
-            padding-bottom: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin-bottom: 8px;
-            border-bottom: 2px solid var(--bg-color);
             display: flex;
             justify-content: space-between;
         }
 
-        .lessons-list { display: flex; flex-direction: column; gap: 8px; }
+        .lessons-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
         .lesson-card {
             background: #f8fafc;
+            border: 1px solid var(--border);
             border-left: 4px solid var(--primary);
-            padding: 10px;
-            border-radius: 6px;
+            padding: 8px 10px;
+            border-radius: 8px;
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .lesson-card.completed {
             border-left-color: var(--success);
-            opacity: 0.65;
-            background: #f0fff4;
+            background: #f0fdf4;
+            opacity: 0.75;
         }
 
-        .lesson-header-row {
+        .lesson-info {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .lesson-time {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .completed .lesson-time { color: var(--success); }
+
+        .lesson-student {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .lesson-actions {
+            display: flex;
+            gap: 4px;
             align-items: center;
         }
 
-        .lesson-time { font-weight: bold; font-size: 13px; color: var(--primary); }
-        .completed .lesson-time { color: var(--success); }
-        .lesson-student { font-size: 14px; font-weight: 500; }
-        .lesson-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 6px;
+        }
+
+        .btn-zoom-icon {
+            background: #eff6ff;
+            color: var(--zoom);
+            border: 1px solid #bfdbfe;
+            text-decoration: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .btn-success-sm { background: var(--success); color: white; }
+        .btn-danger-sm { background: #fee2e2; color: var(--danger); }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Anna's English School</h1>
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+    <header class="app-header">
+        <div class="app-title">Anna's English</div>
+        <div class="header-actions">
+            <button class="btn-icon-top" onclick="toggleZoomInput()">🎥 Zoom</button>
+            <button class="btn-icon-top" onclick="requestNotificationPermission()">🔔</button>
+        </div>
     </header>
 
-    <div class="top-bar">
-        <div class="zoom-settings">
-            <label for="zoomUrl" style="font-size: 12px; font-weight: bold;">Zoom:</label>
-            <input type="text" id="zoomUrl" placeholder="https://zoom.us/j/your-link">
-            <button onclick="saveZoomUrl()">ОК</button>
-        </div>
-        <button class="notif-btn" onclick="requestNotificationPermission()">🔔 Напоминания</button>
+    <!-- Скрытая панель настройки Zoom -->
+    <div class="zoom-bar" id="zoomBar">
+        <input type="text" id="zoomUrl" placeholder="Вставьте ссылку Zoom...">
+        <button class="btn-primary" style="padding: 6px 12px; font-size:12px;" onclick="saveZoomUrl()">ОК</button>
     </div>
 
-    <!-- Статистика -->
+    <!-- СТАТИСТИКА 2х2 -->
     <div class="stats-grid">
         <div class="stat-card">
             <h3>Проведено</h3>
             <div class="value" id="completedLessonsCount">0 / 0</div>
         </div>
         <div class="stat-card">
-            <h3>Часов / Уроков</h3>
+            <h3>Часов</h3>
             <div class="value" id="completedHoursCount">0 ч.</div>
         </div>
         <div class="stat-card">
@@ -298,27 +379,29 @@
             <div class="value" id="earnedIncome">0 ₴</div>
         </div>
         <div class="stat-card">
-            <h3>План на неделю</h3>
+            <h3>План недели</h3>
             <div class="value" id="totalIncomeWeek">0 ₴</div>
         </div>
     </div>
 
-    <!-- Студенты -->
+    <!-- СТУДЕНТЫ -->
     <div class="section-box">
-        <h2>Студенты</h2>
-        <div class="form-row">
+        <div class="section-title">Студенты</div>
+        <div class="form-grid">
             <input type="text" id="studentName" placeholder="Имя">
             <input type="number" id="studentRate" placeholder="Ставка (₴)">
-            <button class="btn-voice-inline" id="voiceStudentBtn" onclick="toggleVoiceTarget('student')" title="Надиктовать имя и ставку">🎤</button>
-            <button onclick="addStudent()">Добавить</button>
+        </div>
+        <div class="form-actions">
+            <button class="btn-voice" id="voiceStudentBtn" onclick="toggleVoiceTarget('student')" title="Надиктовать имя и ставку">🎤</button>
+            <button class="btn-primary" onclick="addStudent()">Добавить студента</button>
         </div>
         <div class="students-list" id="studentsList"></div>
     </div>
 
-    <!-- Запланировать урок -->
+    <!-- ЗАПЛАНИРОВАТЬ УРОК -->
     <div class="section-box">
-        <h2>Запланировать урок</h2>
-        <div class="form-row">
+        <div class="section-title">Запланировать урок</div>
+        <div class="form-grid">
             <select id="lessonDay">
                 <option value="Понедельник">Понедельник</option>
                 <option value="Вторник">Вторник</option>
@@ -329,16 +412,20 @@
                 <option value="Воскресенье">Воскресенье</option>
             </select>
             <input type="time" id="lessonTime" value="15:00">
+        </div>
+        <div class="form-grid full" style="margin-bottom: 8px;">
             <select id="lessonStudentSelect">
                 <option value="">Выберите студента</option>
             </select>
-            <button class="btn-voice-inline" id="voiceLessonBtn" onclick="toggleVoiceTarget('lesson')" title="Надиктовать день, время и имя">🎤</button>
-            <button onclick="addLesson()">+ Урок</button>
+        </div>
+        <div class="form-actions">
+            <button class="btn-voice" id="voiceLessonBtn" onclick="toggleVoiceTarget('lesson')" title="Надиктовать день, время и имя">🎤</button>
+            <button class="btn-primary" onclick="addLesson()">+ Запланировать урок</button>
         </div>
     </div>
 
-    <!-- Расписание -->
-    <h2 style="margin-bottom: 10px; font-size: 18px;">Расписание на неделю</h2>
+    <!-- РАСПИСАНИЕ -->
+    <div class="section-title" style="margin: 16px 2px 8px 2px;">Расписание на неделю</div>
     <div class="week-grid" id="weekGrid"></div>
 
     <script>
@@ -355,7 +442,11 @@
         let zoomUrl = '';
         let notifiedLessons = new Set();
 
-        // --- CLOUD STORAGE ---
+        function toggleZoomInput() {
+            const bar = document.getElementById('zoomBar');
+            bar.classList.toggle('active');
+        }
+
         function loadCloudData() {
             if (tg && tg.CloudStorage) {
                 tg.CloudStorage.getItems(['anna_students', 'anna_lessons', 'anna_zoom_url'], (err, values) => {
@@ -397,7 +488,7 @@
             } else {
                 localStorage.setItem('anna_zoom_url', zoomUrl);
             }
-            alert('Ссылка на Zoom сохранена!');
+            document.getElementById('zoomBar').classList.remove('active');
             render();
         }
 
@@ -458,18 +549,17 @@
             saveData();
         }
 
-        // --- УВЕДОМЛЕНИЯ ---
         function requestNotificationPermission() {
             if ("Notification" in window) {
                 Notification.requestPermission().then(permission => {
                     if (permission === "granted") {
                         alert("Уведомления включены!");
                     } else {
-                        alert("Доступ к уведомлениям отклонен.");
+                        alert("Доступ отклонен.");
                     }
                 });
             } else {
-                alert("Ваш браузер не поддерживает уведомления.");
+                alert("Не поддерживается браузером.");
             }
         }
 
@@ -490,7 +580,7 @@
 
                 if (diff >= 14 && diff <= 15) {
                     new Notification("Anna's English School 🎓", {
-                        body: `Напоминание: Урок с ${l.studentName} через 15 минут (${l.time})!`,
+                        body: `Урок с ${l.studentName} через 15 минут (${l.time})!`,
                         icon: "https://cdn-icons-png.flaticon.com/512/2991/2991195.png"
                     });
                     notifiedLessons.add(l.id);
@@ -499,13 +589,10 @@
         }
         setInterval(checkUpcomingLessons, 30000);
 
-        // =========================================================
-        // === ЛОГИКА ГОЛОСОВОГО ВВОДА (WHISPER API ДЛЯ iOS) ===
-        // =========================================================
-        
+        // --- ГОЛОСОВОЙ ВВОД (GROQ WHISPER) ---
         let mediaRecorder = null;
         let audioChunks = [];
-        let activeVoiceTarget = null; // 'student' или 'lesson'
+        let activeVoiceTarget = null;
 
         async function toggleVoiceTarget(target) {
             if (activeVoiceTarget === target) {
@@ -548,7 +635,7 @@
                 btn.classList.add('recording');
                 btn.innerText = '🔴';
             } catch (err) {
-                alert('Ошибка доступа к микрофону на iPhone. Проверьте разрешения!');
+                alert('Ошибка доступа к микрофону!');
                 console.error(err);
             }
         }
@@ -595,7 +682,7 @@
                 }
             } catch (err) {
                 console.error("Ошибка сети Whisper:", err);
-                alert("Ошибка соединения при распознавании речи.");
+                alert("Ошибка соединения.");
             } finally {
                 btn.innerText = '🎤';
             }
@@ -605,7 +692,6 @@
             const lower = text.toLowerCase();
 
             if (target === 'student') {
-                // ПРИМЕР РЕЧИ: "Олег 600" или "Добавить студента Анна 500"
                 const rateMatch = lower.match(/(\d{3,5})/);
                 if (rateMatch) {
                     document.getElementById('studentRate').value = rateMatch[1];
@@ -618,7 +704,6 @@
                     document.getElementById('studentName').value = name;
                 }
             } else if (target === 'lesson') {
-                // ПРИМЕР РЕЧИ: "Вторник 16:00 Олег" или "Запланируй на среду в 15:30 с Анной"
                 let foundDay = days.find(d => lower.includes(d.toLowerCase()));
                 if (!foundDay) {
                     const todayIdx = (new Date().getDay() + 6) % 7;
@@ -656,8 +741,8 @@
             students.forEach(s => {
                 studentsListEl.innerHTML += `
                     <div class="student-chip">
-                        <b>${s.name}</b> (${s.rate} ₴)
-                        <button class="btn-danger" onclick="deleteStudent(${s.id})">✕</button>
+                        <span><b>${s.name}</b> (${s.rate}₴)</span>
+                        <span class="del-btn" onclick="deleteStudent(${s.id})">✕</span>
                     </div>
                 `;
                 studentSelectEl.innerHTML += `<option value="${s.id}">${s.name} (${s.rate} ₴)</option>`;
@@ -684,22 +769,21 @@
                     }
 
                     const zoomBtnHtml = zoomUrl 
-                        ? `<a href="${zoomUrl}" target="_blank" class="btn-zoom">🎥 Zoom</a>` 
+                        ? `<a href="${zoomUrl}" target="_blank" class="btn-zoom-icon">🎥 Zoom</a>` 
                         : '';
 
                     lessonsHtml += `
                         <div class="lesson-card ${l.completed ? 'completed' : ''}">
-                            <div class="lesson-header-row">
-                                <span class="lesson-time">${l.time} ${l.completed ? '✓ Проведён' : ''}</span>
-                                <span style="font-size: 12px; color: #7f8c8d;">${l.rate} ₴</span>
+                            <div class="lesson-info">
+                                <span class="lesson-time">${l.time} ${l.completed ? '✓' : ''}</span>
+                                <span class="lesson-student">${l.studentName} (${l.rate}₴)</span>
                             </div>
-                            <div class="lesson-student">${l.studentName}</div>
                             <div class="lesson-actions">
                                 ${zoomBtnHtml}
-                                <button class="${l.completed ? 'btn-danger' : 'btn-success'}" onclick="toggleLessonStatus(${l.id})">
-                                    ${l.completed ? 'Вернуть' : '✓ Завершить'}
+                                <button class="btn-sm ${l.completed ? 'btn-danger-sm' : 'btn-success-sm'}" onclick="toggleLessonStatus(${l.id})">
+                                    ${l.completed ? '↩' : '✓'}
                                 </button>
-                                <button class="btn-danger" onclick="deleteLesson(${l.id})">Удалить</button>
+                                <button class="btn-sm btn-danger-sm" onclick="deleteLesson(${l.id})">✕</button>
                             </div>
                         </div>
                     `;
@@ -709,10 +793,10 @@
                     <div class="day-column">
                         <div class="day-header">
                             <span>${day}</span>
-                            <small style="color: #7f8c8d; font-size:12px;">${dayLessons.length} ур.</small>
+                            <span>${dayLessons.length} ур.</span>
                         </div>
                         <div class="lessons-list">
-                            ${lessonsHtml || '<p style="color:#bdc3c7; font-size:12px; text-align:center; padding: 5px;">Нет уроков</p>'}
+                            ${lessonsHtml || '<p style="color:#94a3b8; font-size:12px; text-align:center; padding: 4px;">Нет уроков</p>'}
                         </div>
                     </div>
                 `;
@@ -721,7 +805,7 @@
             document.getElementById('completedLessonsCount').innerText = `${completedCount} / ${lessons.length}`;
             document.getElementById('completedHoursCount').innerText = `${completedCount} ч.`;
             document.getElementById('earnedIncome').innerText = `${earnedIncome} ₴`;
-            document.getElementById('totalIncomeWeek').innerText = `${totalWeekIncome} ₴`;
+            document.getElementById('totalIncomeWeek').innerText = `${totalIncomeWeek} ₴`;
         }
 
         loadCloudData();
