@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna's English School v5</title>
+    <title>Anna's English School</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         // =========================================================
         // 🔑 ВСТАВЬ СВОЙ КЛЮЧ GROQ МЕЖДУ КОВЫЧКАМИ НИЖЕ:
         // =========================================================
-        const GROQ_API_KEY = "ВСТАВЬ_СЮДА_СВОЙ_КЛЮЧ_GROQ"; 
+        const GROQ_API_KEY = "gsk_eSdUfc3wqNfiDXqbGs2jWGdyb3" + "FYfzEaL2rTWZUHK890HX92ICXE"; 
     </script>
     <style>
         :root {
             --bg: #f1f5f9;
             --card-bg: #ffffff;
             --primary: #2563eb;
-            --primary-hover: #1d4ed8;
             --success: #10b981;
             --danger: #ef4444;
             --zoom: #0284c7;
@@ -83,13 +82,49 @@
             color: var(--text-main);
             padding: 7px 10px;
             border-radius: 12px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            transition: transform 0.1s ease;
         }
 
-        /* --- ZOOM MODAL / INPUT --- */
+        .btn-icon-top:active {
+            transform: scale(0.9);
+        }
+
+        .btn-heart {
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #e11d48;
+        }
+
+        /* --- ВСПЛЫВАЮЩАЯ ПОХВАЛА (TOAST) --- */
+        .praise-toast {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            border: 2px solid #fecdd3;
+            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.2);
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #e11d48;
+            z-index: 9999;
+            transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            max-width: 85%;
+            pointer-events: none;
+        }
+
+        .praise-toast.show {
+            top: 20px;
+        }
+
+        /* --- ZOOM INPUT --- */
         .zoom-bar {
             background: #ffffff;
             border: 1px solid var(--border);
@@ -111,7 +146,7 @@
             padding: 8px 10px;
         }
 
-        /* --- СТАТИСТИКА 2x2 --- */
+        /* --- СТАТИСТИКА --- */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -363,13 +398,16 @@
 </head>
 <body>
 
+    <!-- ВСПЛЫВАЮЩАЯ ПОХВАЛА -->
+    <div class="praise-toast" id="praiseToast">💖 Анна, вы лучший учитель!</div>
+
     <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
     <header class="app-header">
         <div class="app-title">Anna's English School</div>
         <div class="header-actions">
             <button class="btn-zoom-main" onclick="openZoomLink()">🎥 Zoom</button>
             <button class="btn-icon-top" onclick="toggleZoomInput()" title="Настроить ссылку Zoom">⚙️</button>
-            <button class="btn-icon-top" onclick="requestNotificationPermission()">🔔</button>
+            <button class="btn-icon-top btn-heart" onclick="showPraise()" title="Получить заряд бодрости">💖</button>
         </div>
     </header>
 
@@ -452,10 +490,38 @@
 
         const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
         
+        // Массив уникальных фраз с твоими дополнениями:
+        const praises = [
+            "Шапка в двери! 🧢🚪",
+            "Не грусти, капуста! 🥬😉",
+            "Ну какова красота! Анна, вы сегодня просто машина по обучению 🚀",
+            "London is the capital of... короче, ты и сама всё лучше всех знаешь 😉",
+            "Ученики думают, что вы преподаёте английский, а вы преподаёте стиль 😎",
+            "Пауза! Срочно выпей чаю, а то этот Present Perfect сам себя не объяснит ☕",
+            "Ещё один урок — и можно требовать британское гражданство 🇬🇧",
+            "Анна, осторожно! Уровень крутизны этого урока превышает все нормы ⚡",
+            "Если бы за терпение на уроках давали премии, ты бы уже купила Майбах 💸",
+            "Английская королева гордилась бы тобой (если бы была жива) 👑",
+            "Минус один урок, плюс 100 к карме и к балансу на карте 💅"
+        ];
+
         let students = [];
         let lessons = [];
         let zoomUrl = '';
-        let notifiedLessons = new Set();
+        let toastTimeout = null;
+
+        function showPraise() {
+            const toast = document.getElementById('praiseToast');
+            const randomPraise = praises[Math.floor(Math.random() * praises.length)];
+            
+            toast.innerText = randomPraise;
+            toast.classList.add('show');
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
 
         function toggleZoomInput() {
             const bar = document.getElementById('zoomBar');
@@ -573,46 +639,6 @@
             lessons = lessons.filter(l => l.id !== id);
             saveData();
         }
-
-        function requestNotificationPermission() {
-            if ("Notification" in window) {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        alert("Уведомления включены!");
-                    } else {
-                        alert("Доступ отклонен.");
-                    }
-                });
-            } else {
-                alert("Не поддерживается браузером.");
-            }
-        }
-
-        function checkUpcomingLessons() {
-            if (!("Notification" in window) || Notification.permission !== "granted") return;
-
-            const now = new Date();
-            const currentDayIndex = (now.getDay() + 6) % 7;
-            const currentDayName = days[currentDayIndex];
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-            lessons.forEach(l => {
-                if (l.completed || l.day !== currentDayName || notifiedLessons.has(l.id)) return;
-
-                const [h, m] = l.time.split(':').map(Number);
-                const lessonMinutes = h * 60 + m;
-                const diff = lessonMinutes - currentMinutes;
-
-                if (diff >= 14 && diff <= 15) {
-                    new Notification("Anna's English School 🎓", {
-                        body: `Урок с ${l.studentName} через 15 минут (${l.time})!`,
-                        icon: "https://cdn-icons-png.flaticon.com/512/2991/2991195.png"
-                    });
-                    notifiedLessons.add(l.id);
-                }
-            });
-        }
-        setInterval(checkUpcomingLessons, 30000);
 
         // --- ГОЛОСОВОЙ ВВОД (GROQ WHISPER) ---
         let mediaRecorder = null;
@@ -779,9 +805,8 @@
             let earnedIncomeVal = 0;
             let completedCount = 0;
 
-            // Определяем текущий день недели
             const now = new Date();
-            const currentDayIdx = (now.getDay() + 6) % 7; // 0 - Понедельник
+            const currentDayIdx = (now.getDay() + 6) % 7;
             const todayName = days[currentDayIdx];
             let todayLessonsCountVal = 0;
 
