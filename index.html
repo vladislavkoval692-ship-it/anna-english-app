@@ -66,11 +66,11 @@
             border: 1px solid #d8b4fe;
             padding: 7px 11px;
             border-radius: 12px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            justify-content: center;
             cursor: pointer;
         }
 
@@ -312,10 +312,8 @@
             text-decoration: none; padding: 5px 9px; border-radius: 8px; font-size: 11px; font-weight: 700;
         }
         .btn-finish-sm { background: #dcfce7; color: #15803d; border: 1px solid #86efac; font-weight: 700; }
-        .btn-success-sm { background: var(--success); color: white; }
         .btn-danger-sm { background: #fee2e2; color: var(--danger); }
 
-        /* ОКНА И МОДАЛКИ */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -329,7 +327,6 @@
 
         .modal-overlay.active { display: flex; }
 
-        /* ВСПЛЫВАЮЩЕЕ ОКНО ПОДТВЕРЖДЕНИЯ УРОКА */
         .confirm-modal-box {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -368,7 +365,6 @@
         }
         .confirm-card-btns { display: flex; gap: 10px; }
 
-        /* ИИ ЧАТ МОДАЛКА */
         .ai-modal {
             background: #ffffff;
             width: 100%;
@@ -438,7 +434,6 @@
 
     <div class="praise-toast" id="praiseToast">💖 Анна, вы лучший учитель!</div>
 
-    <!-- ВСПЛЫВАЮЩЕЕ ОКНО ПОДТВЕРЖДЕНИЯ УРОКА -->
     <div class="confirm-modal-box" id="confirmModal">
         <div class="confirm-card">
             <div style="font-size: 40px; margin-bottom: 10px;">🎓</div>
@@ -455,7 +450,7 @@
     <header class="app-header">
         <div class="app-title">Anna's English</div>
         <div class="header-actions">
-            <button class="btn-ai-top" onclick="openAiModal()">🤖 ИИ Бот</button>
+            <button class="btn-ai-top" onclick="openAiModal()">🤖</button>
             <button class="btn-zoom-main" onclick="openZoomLink()">🎥 Zoom</button>
             <button class="btn-icon-top" onclick="toggleZoomInput()">⚙️</button>
             <button class="btn-icon-top btn-heart" onclick="showPraise()">💖</button>
@@ -527,7 +522,6 @@
     <div class="section-title" style="margin: 18px 2px 10px 2px;">Расписание на неделю</div>
     <div class="week-grid" id="weekGrid"></div>
 
-    <!-- ОКНО ИИ БОТА -->
     <div class="modal-overlay" id="aiModal">
         <div class="ai-modal">
             <div class="ai-header">
@@ -633,17 +627,14 @@
             saveData();
         }
 
-        /* ЛОГИКА ПОДТВЕРЖДЕНИЯ УРОКА В ОКНЕ */
         function requestFinishLesson(id) {
             const lesson = lessons.find(l => l.id === id);
             if (!lesson) return;
 
             if (lesson.completed) {
-                // Если урок уже был выполнен — возвращаем назад без окна
                 lesson.completed = false;
                 saveData();
             } else {
-                // Если урок еще не выполнен — открываем всплывашку
                 targetLessonIdToFinish = id;
                 document.getElementById('confirmModalText').innerText = `Засчитать урок с учеником ${lesson.studentName}?`;
                 document.getElementById('confirmModalAmount').innerText = `+${lesson.rate} ₴`;
@@ -662,7 +653,7 @@
                 if (lesson) {
                     lesson.completed = true;
                     saveData();
-                    showPraise(); // Вызываем праздничный тост
+                    showPraise();
                 }
             }
             closeConfirmModal();
@@ -670,7 +661,6 @@
 
         function deleteLesson(id) { lessons = lessons.filter(l => l.id !== id); saveData(); }
 
-        /* ИИ МОДАЛКА */
         function openAiModal() { document.getElementById('aiModal').classList.add('active'); }
         function closeAiModal() { document.getElementById('aiModal').classList.remove('active'); }
 
@@ -717,7 +707,6 @@
             }
         }
 
-        /* МИКРОФОН (ОПТИМИЗИРОВАН ПОД IOS И ANDROID) */
         let mediaRecorder = null;
         let audioChunks = [];
         let activeVoiceTarget = null;
