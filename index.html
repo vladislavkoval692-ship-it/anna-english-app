@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna's English School — CRM</title>
+    <title>Anna's English School — CRM & AI Assistant</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -16,6 +16,7 @@
             --zoom: #2D8CFF;
             --text: #2c3e50;
             --border: #e1e8ed;
+            --ai-color: #8e44ad;
         }
 
         * {
@@ -29,6 +30,7 @@
             background-color: var(--bg-color);
             color: var(--text);
             padding: 15px;
+            padding-bottom: 80px;
         }
 
         header {
@@ -145,7 +147,7 @@
         button:hover { opacity: 0.9; }
 
         .btn-voice {
-            background: #8e44ad;
+            background: var(--ai-color);
             color: white;
             display: flex;
             align-items: center;
@@ -253,30 +255,98 @@
         .lesson-student { font-size: 14px; font-weight: 500; }
         .lesson-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
 
-        /* Модальные окна */
-        .modal {
+        /* ИИ ЧАТ АССИСТЕНТ */
+        .ai-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--ai-color);
+            color: white;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(142, 68, 173, 0.4);
+            cursor: pointer;
+            z-index: 999;
+            transition: transform 0.2s;
+        }
+
+        .ai-fab:hover { transform: scale(1.05); }
+
+        .ai-chat-window {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            max-width: 90vw;
+            height: 480px;
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 400px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
         }
 
-        .modal-actions {
+        .ai-chat-header {
+            background: var(--ai-color);
+            color: white;
+            padding: 12px 15px;
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .ai-chat-messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #fafafa;
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .msg.user {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .msg.ai {
+            align-self: flex-start;
+            background: #eef2f7;
+            color: #2c3e50;
+            border-bottom-left-radius: 2px;
+        }
+
+        .ai-chat-input-row {
+            display: flex;
+            padding: 8px;
+            gap: 6px;
+            background: white;
+            border-top: 1px solid var(--border);
+        }
+
+        .ai-chat-input-row input {
+            flex: 1;
         }
     </style>
 </head>
@@ -302,6 +372,10 @@
             <div class="value" id="completedLessonsCount">0 / 0</div>
         </div>
         <div class="stat-card">
+            <h3>Часов / Уроков</h3>
+            <div class="value" id="completedHoursCount">0 ч.</div>
+        </div>
+        <div class="stat-card">
             <h3>Заработано</h3>
             <div class="value" id="earnedIncome">0 ₴</div>
         </div>
@@ -318,7 +392,6 @@
             <input type="text" id="studentName" placeholder="Имя">
             <input type="number" id="studentRate" placeholder="Ставка (₴)">
             <button onclick="addStudent()">Добавить</button>
-            <button class="btn-voice" id="voiceStudentBtn" onclick="toggleVoiceRecognition('student')">🎤</button>
         </div>
         <div class="students-list" id="studentsList"></div>
     </div>
@@ -341,7 +414,6 @@
                 <option value="">Выберите студента</option>
             </select>
             <button onclick="addLesson()">+ Урок</button>
-            <button class="btn-voice" id="voiceLessonBtn" onclick="toggleVoiceRecognition('lesson')">🎤</button>
         </div>
     </div>
 
@@ -349,34 +421,21 @@
     <h2 style="margin-bottom: 10px; font-size: 18px;">Расписание на неделю</h2>
     <div class="week-grid" id="weekGrid"></div>
 
-    <!-- Модалка проверки голосового УРОКА -->
-    <div class="modal" id="voiceLessonModal">
-        <div class="modal-content">
-            <h3>Проверка урока</h3>
-            <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;" id="voiceRecognizedLessonText"></p>
-            <hr style="margin: 10px 0;">
-            <p><b>День:</b> <span id="vDay"></span></p>
-            <p><b>Время:</b> <span id="vTime"></span></p>
-            <p><b>Студент:</b> <span id="vStudent"></span></p>
-            <div class="modal-actions">
-                <button class="btn-danger" onclick="closeVoiceModal()">Отмена</button>
-                <button class="btn-success" onclick="confirmVoiceLesson()">Подтвердить</button>
-            </div>
-        </div>
-    </div>
+    <!-- КНОПКА И ОКТНО ЧАТА ИИ АССИСТЕНТА -->
+    <div class="ai-fab" onclick="toggleAiChat()">🤖</div>
 
-    <!-- Модалка проверки голосового СТУДЕНТА -->
-    <div class="modal" id="voiceStudentModal">
-        <div class="modal-content">
-            <h3>Проверка студента</h3>
-            <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;" id="voiceRecognizedStudentText"></p>
-            <hr style="margin: 10px 0;">
-            <p><b>Имя студента:</b> <span id="vStudentName"></span></p>
-            <p><b>Ставка:</b> <span id="vStudentRate"></span> ₴</p>
-            <div class="modal-actions">
-                <button class="btn-danger" onclick="closeVoiceModal()">Отмена</button>
-                <button class="btn-success" onclick="confirmVoiceStudent()">Подтвердить</button>
-            </div>
+    <div class="ai-chat-window" id="aiChatWindow">
+        <div class="ai-chat-header">
+            <span>🤖 AI Ассистент Анны</span>
+            <span style="cursor: pointer;" onclick="toggleAiChat()">✕</span>
+        </div>
+        <div class="ai-chat-messages" id="aiChatMessages">
+            <div class="msg ai">Привет, Анна! Я твой личный ИИ-ассистент. Скажи или напиши, что нужно сделать (например: "Сколько часов проведено?", "Добавь студентов Олег 600 и Анна 500", "Запланируй урок с Олегом во вторник в 16:00").</div>
+        </div>
+        <div class="ai-chat-input-row">
+            <input type="text" id="aiInput" placeholder="Спроси или прикажи..." onkeypress="if(event.key==='Enter') sendAiMessage()">
+            <button class="btn-voice" id="aiVoiceBtn" onclick="toggleAiVoice()">🎤</button>
+            <button onclick="sendAiMessage()">➤</button>
         </div>
     </div>
 
@@ -391,10 +450,6 @@
         let students = JSON.parse(localStorage.getItem('anna_students')) || [];
         let lessons = JSON.parse(localStorage.getItem('anna_lessons')) || [];
         let zoomUrl = localStorage.getItem('anna_zoom_url') || '';
-        
-        let pendingVoiceLesson = null;
-        let pendingVoiceStudent = null;
-        let activeVoiceMode = null; // 'lesson' или 'student'
         let notifiedLessons = new Set();
 
         document.getElementById('zoomUrl').value = zoomUrl;
@@ -474,7 +529,7 @@
             if ("Notification" in window) {
                 Notification.requestPermission().then(permission => {
                     if (permission === "granted") {
-                        alert("Уведомления включены! Мы напомним за 15 минут до урока.");
+                        alert("Уведомления включены!");
                     } else {
                         alert("Доступ к уведомлениям отклонен.");
                     }
@@ -510,170 +565,234 @@
         }
         setInterval(checkUpcomingLessons, 30000);
 
-        // --- ГОЛОСОВОЙ ВВОД ---
-        let recognition = null;
-        let isRecording = false;
+        // =========================================================
+        // === ЛИЧНЫЙ ИИ-АССИСТЕНТ ДВИЖОК ===
+        // =========================================================
+        
+        function toggleAiChat() {
+            const win = document.getElementById('aiChatWindow');
+            win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function appendMessage(sender, text) {
+            const container = document.getElementById('aiChatMessages');
+            const msg = document.createElement('div');
+            msg.className = `msg ${sender}`;
+            msg.innerText = text;
+            container.appendChild(msg);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ru-RU';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function sendAiMessage() {
+            const input = document.getElementById('aiInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendMessage('user', text);
+            input.value = '';
+
+            setTimeout(() => {
+                const reply = processAiCommand(text);
+                appendMessage('ai', reply);
+                speakText(reply);
+            }, 300);
+        }
+
+        // ГОЛОСОВОЙ ВВОД ДЛЯ ИИ
+        let aiRecognition = null;
+        let isAiRecording = false;
 
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.lang = 'ru-RU';
-            recognition.continuous = false;
+            aiRecognition = new SpeechRecognition();
+            aiRecognition.lang = 'ru-RU';
+            aiRecognition.continuous = false;
 
-            recognition.onstart = function() {
-                isRecording = true;
-                const btnId = activeVoiceMode === 'student' ? 'voiceStudentBtn' : 'voiceLessonBtn';
-                const btn = document.getElementById(btnId);
-                if (btn) {
-                    btn.classList.add('recording');
-                    btn.innerText = '🔴';
-                }
+            aiRecognition.onstart = function() {
+                isAiRecording = true;
+                document.getElementById('aiVoiceBtn').classList.add('recording');
+                document.getElementById('aiVoiceBtn').innerText = '🔴';
             };
 
-            recognition.onresult = function(event) {
-                const text = event.results[0][0].transcript.toLowerCase();
-                if (activeVoiceMode === 'student') {
-                    parseVoiceStudent(text);
-                } else {
-                    parseVoiceLesson(text);
-                }
+            aiRecognition.onresult = function(event) {
+                const text = event.results[0][0].transcript;
+                document.getElementById('aiInput').value = text;
+                sendAiMessage();
             };
 
-            recognition.onerror = function() {
-                alert('Ошибка распознавания речи.');
-                stopVoice();
+            aiRecognition.onerror = function() {
+                stopAiVoice();
             };
 
-            recognition.onend = function() {
-                stopVoice();
+            aiRecognition.onend = function() {
+                stopAiVoice();
             };
         }
 
-        function toggleVoiceRecognition(mode) {
-            if (!recognition) {
+        function toggleAiVoice() {
+            if (!aiRecognition) {
                 alert('Голосовой ввод не поддерживается браузером.');
                 return;
             }
-            if (isRecording) {
-                recognition.stop();
+            if (isAiRecording) {
+                aiRecognition.stop();
             } else {
-                activeVoiceMode = mode;
-                recognition.start();
+                aiRecognition.start();
             }
         }
 
-        function stopVoice() {
-            isRecording = false;
-            ['voiceStudentBtn', 'voiceLessonBtn'].forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) {
-                    btn.classList.remove('recording');
-                    btn.innerText = '🎤';
-                }
-            });
+        function stopAiVoice() {
+            isAiRecording = false;
+            const btn = document.getElementById('aiVoiceBtn');
+            if (btn) {
+                btn.classList.remove('recording');
+                btn.innerText = '🎤';
+            }
         }
 
-        // Парсинг голосового студента
-        function parseVoiceStudent(text) {
-            document.getElementById('voiceRecognizedStudentText').innerText = `Распознано: "${text}"`;
+        // МОЗГ ИИ: Парсинг и исполнение команд
+        function processAiCommand(cmd) {
+            const lower = cmd.toLowerCase();
 
-            let rateMatch = text.match(/(\d{3,5})/);
-            let rate = rateMatch ? parseInt(rateMatch[1]) : 500;
-
-            let stopWords = ["добавить", "студента", "студент", "ставка", "ставкой", "рублей", "гривен", "грн"];
-            let words = text.split(' ').filter(w => !stopWords.includes(w) && isNaN(w) && w.length > 1);
-
-            let name = words.length > 0 ? words[0] : "Новый Студент";
-            name = name.charAt(0).toUpperCase() + name.slice(1);
-
-            pendingVoiceStudent = { name, rate };
-
-            document.getElementById('vStudentName').innerText = name;
-            document.getElementById('vStudentRate').innerText = rate;
-            document.getElementById('voiceStudentModal').style.display = 'flex';
-        }
-
-        // Парсинг голосового урока
-        function parseVoiceLesson(text) {
-            document.getElementById('voiceRecognizedLessonText').innerText = `Распознано: "${text}"`;
-
-            let foundDay = days.find(d => text.includes(d.toLowerCase()));
-            if (!foundDay) {
-                const todayIdx = (new Date().getDay() + 6) % 7;
-                if (text.includes('сегодня')) foundDay = days[todayIdx];
-                if (text.includes('завтра')) foundDay = days[(todayIdx + 1) % 7];
-            }
-            if (!foundDay) foundDay = days[(new Date().getDay() + 6) % 7];
-
-            let foundTime = "15:00";
-            const timeMatch = text.match(/(\d{1,2})[:\s]?(\d{2})?/) || text.match(/в\s(\d{1,2})/);
-            if (timeMatch) {
-                let h = parseInt(timeMatch[1]);
-                let m = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
-                if (h < 24) {
-                    foundTime = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-                }
+            // 1. Подсчет часов / уроков за неделю
+            if (lower.includes('часов') || lower.includes('часа') || lower.includes('сколько уроков')) {
+                const completedCount = lessons.filter(l => l.completed).length;
+                const totalCount = lessons.length;
+                return `На этой неделе проведёно ${completedCount} часов (уроков) из ${totalCount} запланированных.`;
             }
 
-            let words = text.split(' ').filter(w => w.length > 2);
-            let foundStudentName = "Студент";
+            // 2. Подсчет дохода
+            if (lower.includes('доход') || lower.includes('заработал') || lower.includes('деньги') || lower.includes('сколько денег')) {
+                const earned = lessons.filter(l => l.completed).reduce((sum, l) => sum + l.rate, 0);
+                const total = lessons.reduce((sum, l) => sum + l.rate, 0);
+                return `Вы уже заработали ${earned} ₴. Общий план на неделю: ${total} ₴.`;
+            }
 
-            let existing = students.find(s => text.includes(s.name.toLowerCase()));
-            if (existing) {
-                foundStudentName = existing.name;
-            } else {
-                let stopWords = ["понедельник","вторник","среда","четверг","пятница","суббота","воскресенье","сегодня","завтра","урок","в"];
-                let nameCandidate = words.find(w => !stopWords.includes(w) && isNaN(w));
-                if (nameCandidate) {
-                    foundStudentName = nameCandidate.charAt(0).toUpperCase() + nameCandidate.slice(1);
+            // 3. Список студентов
+            if (lower.includes('кто мои студенты') || lower.includes('список студентов') || lower.includes('все студенты')) {
+                if (students.length === 0) return "Список студентов пока пуст.";
+                const list = students.map(s => `${s.name} (${s.rate} ₴)`).join(', ');
+                return `Ваши студенты: ${list}.`;
+            }
+
+            // 4. Добавление студентов (одновременно нескольких или одного)
+            if (lower.includes('добав') && (lower.includes('студент') || lower.includes('ученик'))) {
+                // Ищем шаблон: Имя Ставка
+                let added = [];
+                // Убираем лишнее
+                let clean = lower.replace(/добавить|добавь|студентов|студента|ученика|ставка|ставкой|грн|гривен/g, '');
+                let parts = clean.split(/,|и|\./);
+
+                parts.forEach(p => {
+                    let rateMatch = p.match(/(\d{3,5})/);
+                    let rate = rateMatch ? parseInt(rateMatch[1]) : 500;
+                    let nameWords = p.replace(/\d+/g, '').trim().split(' ').filter(w => w.length > 1);
+                    if (nameWords.length > 0) {
+                        let name = nameWords[0].charAt(0).toUpperCase() + nameWords[0].slice(1);
+                        students.push({ id: Date.now() + Math.random(), name, rate });
+                        added.push(`${name} (${rate} ₴)`);
+                    }
+                });
+
+                if (added.length > 0) {
+                    saveData();
+                    return `Успешно добавлены студенты: ${added.join(', ')}.`;
                 }
             }
 
-            pendingVoiceLesson = { day: foundDay, time: foundTime, studentName: foundStudentName };
-
-            document.getElementById('vDay').innerText = foundDay;
-            document.getElementById('vTime').innerText = foundTime;
-            document.getElementById('vStudent').innerText = foundStudentName;
-
-            document.getElementById('voiceLessonModal').style.display = 'flex';
-        }
-
-        function closeVoiceModal() {
-            document.getElementById('voiceLessonModal').style.display = 'none';
-            document.getElementById('voiceStudentModal').style.display = 'none';
-            pendingVoiceLesson = null;
-            pendingVoiceStudent = null;
-        }
-
-        function confirmVoiceStudent() {
-            if (!pendingVoiceStudent) return;
-            students.push({ id: Date.now(), name: pendingVoiceStudent.name, rate: pendingVoiceStudent.rate });
-            closeVoiceModal();
-            saveData();
-        }
-
-        function confirmVoiceLesson() {
-            if (!pendingVoiceLesson) return;
-
-            let student = students.find(s => s.name.toLowerCase() === pendingVoiceLesson.studentName.toLowerCase());
-            if (!student) {
-                student = { id: Date.now(), name: pendingVoiceLesson.studentName, rate: 500 };
-                students.push(student);
+            // 5. Отмена / Удаление урока
+            if (lower.includes('отмени') || lower.includes('удали урок')) {
+                let existing = students.find(s => lower.includes(s.name.toLowerCase()));
+                if (existing) {
+                    let beforeCount = lessons.length;
+                    lessons = lessons.filter(l => l.studentName.toLowerCase() !== existing.name.toLowerCase());
+                    saveData();
+                    return `Уроки с ${existing.name} отменены.`;
+                }
             }
 
-            lessons.push({
-                id: Date.now(),
-                day: pendingVoiceLesson.day,
-                time: pendingVoiceLesson.time,
-                studentName: student.name,
-                rate: student.rate,
-                completed: false
-            });
+            // 6. Отметка урока как проведённого
+            if (lower.includes('проведен') || lower.includes('заверши') || lower.includes('прошел')) {
+                let existing = students.find(s => lower.includes(s.name.toLowerCase()));
+                if (existing) {
+                    let lesson = lessons.find(l => l.studentName.toLowerCase() === existing.name.toLowerCase() && !l.completed);
+                    if (lesson) {
+                        lesson.completed = true;
+                        saveData();
+                        return `Урок с ${existing.name} отмечен как проведённый!`;
+                    }
+                }
+            }
 
-            closeVoiceModal();
-            saveData();
+            // 7. Планирование урока
+            if (lower.includes('урок') || lower.includes('запланируй') || lower.includes('поставь')) {
+                let foundDay = days.find(d => lower.includes(d.toLowerCase()));
+                if (!foundDay) {
+                    const todayIdx = (new Date().getDay() + 6) % 7;
+                    if (lower.includes('сегодня')) foundDay = days[todayIdx];
+                    if (lower.includes('завтра')) foundDay = days[(todayIdx + 1) % 7];
+                }
+                if (!foundDay) foundDay = days[(new Date().getDay() + 6) % 7];
+
+                let foundTime = "15:00";
+                const timeMatch = lower.match(/(\d{1,2})[:\s]?(\d{2})?/) || lower.match(/в\s(\d{1,2})/);
+                if (timeMatch) {
+                    let h = parseInt(timeMatch[1]);
+                    let m = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+                    if (h < 24) {
+                        foundTime = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                    }
+                }
+
+                let student = students.find(s => lower.includes(s.name.toLowerCase()));
+                if (!student) {
+                    // Создаем студента если его нет
+                    let words = lower.split(' ').filter(w => w.length > 2);
+                    let stopWords = ["понедельник","вторник","среда","четверг","пятница","суббота","воскресенье","сегодня","завтра","урок","в","поставь","запланируй","добавь"];
+                    let nameCandidate = words.find(w => !stopWords.includes(w) && isNaN(w));
+                    let name = nameCandidate ? nameCandidate.charAt(0).toUpperCase() + nameCandidate.slice(1) : "Студент";
+                    student = { id: Date.now(), name, rate: 500 };
+                    students.push(student);
+                }
+
+                lessons.push({
+                    id: Date.now(),
+                    day: foundDay,
+                    time: foundTime,
+                    studentName: student.name,
+                    rate: student.rate,
+                    completed: false
+                });
+
+                saveData();
+                return `Запланирован урок: ${student.name}, ${foundDay} в ${foundTime}.`;
+            }
+
+            // 8. Ссылка на Zoom
+            if (lower.includes('zoom') || lower.includes('зум')) {
+                let match = cmd.match(/(https?:\/\/[^\s]+)/);
+                if (match) {
+                    zoomUrl = match[0];
+                    localStorage.setItem('anna_zoom_url', zoomUrl);
+                    document.getElementById('zoomUrl').value = zoomUrl;
+                    render();
+                    return `Ссылка на Zoom обновлена!`;
+                }
+            }
+
+            // Общий ответ
+            return "Я поняла команду, но пока не могу её выполнить в точности. Попробуй сказать: 'Сколько часов проведено?', 'Запланируй урок с Олегом на завтра в 15:00' или 'Добавь студента Анна 600'.";
         }
 
+        // RENDER
         function render() {
             const studentsListEl = document.getElementById('studentsList');
             const studentSelectEl = document.getElementById('lessonStudentSelect');
@@ -747,6 +866,7 @@
             });
 
             document.getElementById('completedLessonsCount').innerText = `${completedCount} / ${lessons.length}`;
+            document.getElementById('completedHoursCount').innerText = `${completedCount} ч.`;
             document.getElementById('earnedIncome').innerText = `${earnedIncome} ₴`;
             document.getElementById('totalIncomeWeek').innerText = `${totalWeekIncome} ₴`;
         }
