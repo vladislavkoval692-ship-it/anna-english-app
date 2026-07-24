@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna's English School — CRM & AI Assistant</title>
+    <title>Anna's English School — Cloud CRM & AI</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -421,7 +421,7 @@
     <h2 style="margin-bottom: 10px; font-size: 18px;">Расписание на неделю</h2>
     <div class="week-grid" id="weekGrid"></div>
 
-    <!-- КНОПКА И ОКТНО ЧАТА ИИ АССИСТЕНТА -->
+    <!-- КНОПКА И ОКНО ЧАТА ИИ АССИСТЕНТА -->
     <div class="ai-fab" onclick="toggleAiChat()">🤖</div>
 
     <div class="ai-chat-window" id="aiChatWindow">
@@ -440,30 +440,63 @@
     </div>
 
     <script>
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        if (tg) {
+            tg.ready();
+            tg.expand();
         }
 
         const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
         
-        let students = JSON.parse(localStorage.getItem('anna_students')) || [];
-        let lessons = JSON.parse(localStorage.getItem('anna_lessons')) || [];
-        let zoomUrl = localStorage.getItem('anna_zoom_url') || '';
+        let students = [];
+        let lessons = [];
+        let zoomUrl = '';
         let notifiedLessons = new Set();
 
-        document.getElementById('zoomUrl').value = zoomUrl;
-
-        function saveZoomUrl() {
-            zoomUrl = document.getElementById('zoomUrl').value.trim();
-            localStorage.setItem('anna_zoom_url', zoomUrl);
-            alert('Ссылка на Zoom сохранена!');
-            render();
+        // --- ВЗАИМОДЕЙСТВИЕ С TELEGRAM CLOUD STORAGE ---
+        function loadCloudData() {
+            if (tg && tg.CloudStorage) {
+                tg.CloudStorage.getItems(['anna_students', 'anna_lessons', 'anna_zoom_url'], (err, values) => {
+                    if (!err) {
+                        students = values.anna_students ? JSON.parse(values.anna_students) : [];
+                        lessons = values.anna_lessons ? JSON.parse(values.anna_lessons) : [];
+                        zoomUrl = values.anna_zoom_url || '';
+                        document.getElementById('zoomUrl').value = zoomUrl;
+                        render();
+                    }
+                });
+            } else {
+                // Фолбэк на localStorage, если приложение открыто вне Telegram
+                students = JSON.parse(localStorage.getItem('anna_students')) || [];
+                lessons = JSON.parse(localStorage.getItem('anna_lessons')) || [];
+                zoomUrl = localStorage.getItem('anna_zoom_url') || '';
+                document.getElementById('zoomUrl').value = zoomUrl;
+                render();
+            }
         }
 
         function saveData() {
-            localStorage.setItem('anna_students', JSON.stringify(students));
-            localStorage.setItem('anna_lessons', JSON.stringify(lessons));
+            const studentsStr = JSON.stringify(students);
+            const lessonsStr = JSON.stringify(lessons);
+
+            if (tg && tg.CloudStorage) {
+                tg.CloudStorage.setItem('anna_students', studentsStr);
+                tg.CloudStorage.setItem('anna_lessons', lessonsStr);
+            } else {
+                localStorage.setItem('anna_students', studentsStr);
+                localStorage.setItem('anna_lessons', lessonsStr);
+            }
+            render();
+        }
+
+        function saveZoomUrl() {
+            zoomUrl = document.getElementById('zoomUrl').value.trim();
+            if (tg && tg.CloudStorage) {
+                tg.CloudStorage.setItem('anna_zoom_url', zoomUrl);
+            } else {
+                localStorage.setItem('anna_zoom_url', zoomUrl);
+            }
+            alert('Ссылка на Zoom сохранена!');
             render();
         }
 
@@ -685,9 +718,7 @@
 
             // 4. Добавление студентов (одновременно нескольких или одного)
             if (lower.includes('добав') && (lower.includes('студент') || lower.includes('ученик'))) {
-                // Ищем шаблон: Имя Ставка
                 let added = [];
-                // Убираем лишнее
                 let clean = lower.replace(/добавить|добавь|студентов|студента|ученика|ставка|ставкой|грн|гривен/g, '');
                 let parts = clean.split(/,|и|\./);
 
@@ -712,7 +743,6 @@
             if (lower.includes('отмени') || lower.includes('удали урок')) {
                 let existing = students.find(s => lower.includes(s.name.toLowerCase()));
                 if (existing) {
-                    let beforeCount = lessons.length;
                     lessons = lessons.filter(l => l.studentName.toLowerCase() !== existing.name.toLowerCase());
                     saveData();
                     return `Уроки с ${existing.name} отменены.`;
@@ -754,7 +784,6 @@
 
                 let student = students.find(s => lower.includes(s.name.toLowerCase()));
                 if (!student) {
-                    // Создаем студента если его нет
                     let words = lower.split(' ').filter(w => w.length > 2);
                     let stopWords = ["понедельник","вторник","среда","четверг","пятница","суббота","воскресенье","сегодня","завтра","урок","в","поставь","запланируй","добавь"];
                     let nameCandidate = words.find(w => !stopWords.includes(w) && isNaN(w));
@@ -781,15 +810,18 @@
                 let match = cmd.match(/(https?:\/\/[^\s]+)/);
                 if (match) {
                     zoomUrl = match[0];
-                    localStorage.setItem('anna_zoom_url', zoomUrl);
+                    if (tg && tg.CloudStorage) {
+                        tg.CloudStorage.setItem('anna_zoom_url', zoomUrl);
+                    } else {
+                        localStorage.setItem('anna_zoom_url', zoomUrl);
+                    }
                     document.getElementById('zoomUrl').value = zoomUrl;
                     render();
                     return `Ссылка на Zoom обновлена!`;
                 }
             }
 
-            // Общий ответ
-            return "Я поняла команду, но пока не могу её выполнить в точности. Попробуй сказать: 'Сколько часов проведено?', 'Запланируй урок с Олегом на завтра в 15:00' или 'Добавь студента Анна 600'.";
+            return "Я поняла команду, но пока не могу её выполнить. Попробуй: 'Сколько часов проведено?', 'Запланируй урок с Олегом во вторник в 15:00' или 'Добавь студента Анна 600'.";
         }
 
         // RENDER
@@ -871,7 +903,8 @@
             document.getElementById('totalIncomeWeek').innerText = `${totalWeekIncome} ₴`;
         }
 
-        render();
+        // Загружаем облачные данные при открытии
+        loadCloudData();
     </script>
 </body>
 </html>
