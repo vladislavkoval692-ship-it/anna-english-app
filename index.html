@@ -146,6 +146,43 @@
             text-transform: uppercase;
         }
 
+        /* --- ПОЛЯ ВВОДА С МИКРОФОНОМ --- */
+        .input-with-mic {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .input-with-mic input {
+            padding-right: 40px !important;
+        }
+
+        .mic-btn {
+            position: absolute;
+            right: 6px;
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .mic-btn.listening {
+            background: rgba(239, 68, 68, 0.2);
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15); }
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -556,7 +593,10 @@
     <div class="settings-bar" id="settingsBar">
         <div class="settings-field">
             <label>Имя преподавателя</label>
-            <input type="text" id="teacherNameInput" placeholder="Укажите ваше имя...">
+            <div class="input-with-mic">
+                <input type="text" id="teacherNameInput" placeholder="Укажите ваше имя...">
+                <button class="mic-btn" onclick="startVoiceInput('teacherNameInput', this)">🎙️</button>
+            </div>
         </div>
         <div class="settings-field">
             <label>Ссылка на Zoom</label>
@@ -593,7 +633,10 @@
             <div class="limit-info-tag" id="limitTag">Лимит: 0 / 3</div>
         </div>
         <div class="form-grid">
-            <input type="text" id="studentName" placeholder="Имя">
+            <div class="input-with-mic">
+                <input type="text" id="studentName" placeholder="Имя">
+                <button class="mic-btn" onclick="startVoiceInput('studentName', this)">🎙️</button>
+            </div>
             <input type="number" id="studentRate" placeholder="Ставка (₴)">
         </div>
         <div class="form-actions">
@@ -693,6 +736,40 @@
         const FREE_STUDENT_LIMIT = 3;
 
         document.getElementById('lessonDate').valueAsDate = new Date();
+
+        /* --- ГОЛОСОВОЙ ВВОД (WEB SPEECH API) --- */
+        function startVoiceInput(inputId, btnEl) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('К сожалению, ваш браузер или устройство не поддерживает голосовой ввод.');
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ru-RU';
+            recognition.interimResults = false;
+
+            btnEl.classList.add('listening');
+
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                const inputEl = document.getElementById(inputId);
+                if (inputEl) {
+                    // Делаем первую букву заглавной
+                    inputEl.value = text.charAt(0).toUpperCase() + text.slice(1);
+                }
+            };
+
+            recognition.onerror = () => {
+                btnEl.classList.remove('listening');
+            };
+
+            recognition.onend = () => {
+                btnEl.classList.remove('listening');
+            };
+
+            recognition.start();
+        }
 
         function showPraise() {
             const toast = document.getElementById('praiseToast');
@@ -794,7 +871,6 @@
         }
 
         async function addStudent() {
-            // Проверка лимита бесплатного тарифа
             if (!isPremium && students.length >= FREE_STUDENT_LIMIT) {
                 openPaywallModal();
                 return;
@@ -888,7 +964,6 @@
         }
 
         function render() {
-            // Обновление плашки лимита и плашки в шапке
             const limitTag = document.getElementById('limitTag');
             const headerPlanText = document.getElementById('headerPlanText');
 
