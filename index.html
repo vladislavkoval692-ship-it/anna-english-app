@@ -515,36 +515,45 @@
         </div>
     </header>
 
+    <!-- НАСТРОЙКИ (С ВЫБОРОМ ЯЗЫКА) -->
     <div class="settings-bar" id="settingsBar">
         <div class="settings-field">
-            <label>Имя преподавателя</label>
+            <label id="lblLang">Language / Язык 🌐</label>
+            <select id="langSelect" onchange="changeLanguage(this.value)">
+                <option value="ru">🇷🇺 Русский</option>
+                <option value="uk">🇺🇦 Українська</option>
+                <option value="en">🇬🇧 English</option>
+            </select>
+        </div>
+        <div class="settings-field">
+            <label id="lblTeacherName">Имя преподавателя</label>
             <input type="text" id="teacherNameInput" placeholder="Укажите ваше имя...">
         </div>
         <div class="settings-field">
-            <label>Ссылка на Zoom</label>
+            <label id="lblZoomUrl">Ссылка на Zoom</label>
             <input type="text" id="zoomUrl" placeholder="Вставьте ссылку на Zoom...">
         </div>
-        <button class="btn-primary" style="padding: 10px;" onclick="saveSettings()">Сохранить настройки</button>
+        <button class="btn-primary" style="padding: 10px;" id="btnSaveSettings" onclick="saveSettings()">Сохранить настройки</button>
     </div>
 
     <div class="stats-grid">
         <div class="stat-card">
-            <h3>Проведено</h3>
+            <h3 id="lblCompletedStat">Проведено</h3>
             <div class="value" id="completedLessonsCount">0 / 0</div>
         </div>
         <div class="stat-card">
-            <h3>Уроки сегодня</h3>
+            <h3 id="lblTodayStat">Уроки сегодня</h3>
             <div class="value" id="todayLessonsCount">0</div>
         </div>
         <div class="stat-card" style="cursor:pointer;" onclick="openStudentsModal()">
-            <h3>Студенты</h3>
+            <h3 id="lblStudentsStat">Студенты</h3>
             <div class="value">
                 <span id="totalStudentsCount">0</span>
-                <span class="student-badge-btn">👥 Список</span>
+                <span class="student-badge-btn" id="btnStudentBadge">👥 Список</span>
             </div>
         </div>
         <div class="stat-card">
-            <h3>Заработано</h3>
+            <h3 id="lblEarnedStat">Заработано</h3>
             <div class="value" id="earnedIncome">0 ₴</div>
         </div>
     </div>
@@ -552,7 +561,7 @@
     <!-- БЛОК ДОБАВЛЕНИЯ СТУДЕНТА -->
     <div class="section-box">
         <div class="section-header-flex">
-            <div class="section-title">Студенты</div>
+            <div class="section-title" id="lblStudentsSection">Студенты</div>
             <div class="limit-info-tag" id="limitTag">Лимит: 0 / 3</div>
         </div>
         <div class="form-grid">
@@ -560,7 +569,7 @@
             <input type="number" id="studentRate" placeholder="Ставка (₴)">
         </div>
         <div class="form-actions">
-            <button class="btn-primary" onclick="addStudent()">Добавить студента</button>
+            <button class="btn-primary" id="btnAddStudent" onclick="addStudent()">Добавить студента</button>
             <button class="mic-btn-action" onclick="startVoiceStudentAdd(this)" title="Надиктовать студента">🎙️</button>
         </div>
         <div class="students-list" id="studentsList"></div>
@@ -568,7 +577,7 @@
 
     <!-- БЛОК ЗАПЛАНИРОВАТЬ УРОК -->
     <div class="section-box">
-        <div class="section-title" style="margin-bottom: 12px;">Запланировать урок</div>
+        <div class="section-title" id="lblScheduleSection" style="margin-bottom: 12px;">Запланировать урок</div>
         <div class="form-grid">
             <input type="date" id="lessonDate">
             <input type="time" id="lessonTime" value="15:00">
@@ -579,18 +588,18 @@
             </select>
         </div>
         <div class="form-actions">
-            <button class="btn-primary" onclick="addLesson()">+ Запланировать урок</button>
+            <button class="btn-primary" id="btnAddLesson" onclick="addLesson()">+ Запланировать урок</button>
             <button class="mic-btn-action" onclick="startVoiceLessonSchedule(this)" title="Надиктовать урок голосом">🎙️</button>
         </div>
     </div>
 
-    <div class="section-title" style="margin: 18px 2px 10px 2px;">Расписание занятий</div>
+    <div class="section-title" id="lblScheduleTitle" style="margin: 18px 2px 10px 2px;">Расписание занятий</div>
     <div class="week-container" id="weekGrid"></div>
 
     <div class="modal-overlay" id="studentsModal" onclick="closeStudentsModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <div class="modal-title">Ваши ученики 🎓</div>
+                <div class="modal-title" id="lblModalTitle">Ваши ученики 🎓</div>
                 <button class="modal-close" onclick="closeStudentsModal()">✕</button>
             </div>
             <div class="modal-students-list" id="modalStudentsList"></div>
@@ -604,17 +613,17 @@
             </div>
             <div class="paywall-icon">🚀</div>
             <div class="paywall-title">English School PRO</div>
-            <div class="paywall-desc">Вы достигли лимита бесплатной версии (3 ученика). Перейдите на PRO, чтобы вести бизнес без ограничений!</div>
+            <div class="paywall-desc" id="lblPaywallDesc">Вы достигли лимита бесплатной версии (3 ученика). Перейдите на PRO, чтобы вести бизнес без ограничений!</div>
             
-            <div class="paywall-features">
+            <div class="paywall-features" id="lblPaywallFeatures">
                 <div>✅ <b>Неограниченное</b> количество учеников</div>
                 <div>✅ Авто-уведомления уроков в Telegram</div>
                 <div>✅ Полная статистика доходов и занятий</div>
                 <div>✅ Приоритетная поддержка</div>
             </div>
 
-            <div class="paywall-price">4.99 $ <span style="font-size: 13px; color: var(--text-sub); font-weight: normal;">/ месяц</span></div>
-            <button class="btn-gold" onclick="subscribePro()">Оформить PRO подписку</button>
+            <div class="paywall-price">4.99 $ <span style="font-size: 13px; color: var(--text-sub); font-weight: normal;" id="lblPerMonth">/ месяц</span></div>
+            <button class="btn-gold" id="btnSubscribePro" onclick="subscribePro()">Оформить PRO подписку</button>
         </div>
     </div>
 
@@ -643,8 +652,115 @@
             }
         } catch (e) {}
 
-        const daysOfWeek = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-        const months = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+        // --- ЛОКАЛИЗАЦИЯ (ИЗЫКИ) ---
+        let currentLang = 'ru';
+        const i18n = {
+            ru: {
+                days: ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"],
+                months: ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"],
+                teacherNameLbl: "Имя преподавателя",
+                teacherNamePh: "Укажите ваше имя...",
+                zoomUrlLbl: "Ссылка на Zoom",
+                zoomUrlPh: "Вставьте ссылку на Zoom...",
+                saveSettingsBtn: "Сохранить настройки",
+                completedStat: "Проведено",
+                todayStat: "Уроки сегодня",
+                studentsStat: "Студенты",
+                earnedStat: "Заработано",
+                badgeList: "👥 Список",
+                studentsSection: "Студенты",
+                studentNamePh: "Имя",
+                studentRatePh: "Ставка (₴)",
+                addStudentBtn: "Добавить студента",
+                scheduleSection: "Запланировать урок",
+                selectStudentDef: "Выберите студента",
+                addLessonBtn: "+ Запланировать урок",
+                scheduleTitle: "Расписание занятий",
+                noLessons: "Нет уроков",
+                todayTag: "• СЕГОДНЯ",
+                expandSch: "Показать остальные дни ▼",
+                collapseSch: "Свернуть расписание ▲",
+                modalTitle: "Ваши ученики 🎓",
+                noStudentsYet: "Студентов пока нет",
+                freeLimitTag: "Бесплатно",
+                proLimitTag: "PRO: Безлимит",
+                paywallDesc: "Вы достигли лимита бесплатной версии (3 ученика). Перейдите на PRO, чтобы вести бизнес без ограничений!",
+                paywallFeat: "<div>✅ <b>Неограниченное</b> количество учеников</div><div>✅ Авто-уведомления уроков в Telegram</div><div>✅ Полная статистика доходов и занятий</div><div>✅ Приоритетная поддержка</div>",
+                perMonth: "/ месяц",
+                subProBtn: "Оформить PRO подписку",
+                unit: "ур."
+            },
+            uk: {
+                days: ["Неділя", "Понеділок", "Вівторок", "Середа", "Четвер", "П'ятниця", "Субота"],
+                months: ["січ", "лют", "бер", "квіт", "трав", "черв", "лип", "серп", "вер", "жовт", "лис", "груд"],
+                teacherNameLbl: "Ім'я викладача",
+                teacherNamePh: "Вкажіть ваше ім'я...",
+                zoomUrlLbl: "Посилання на Zoom",
+                zoomUrlPh: "Вставте посилання на Zoom...",
+                saveSettingsBtn: "Зберегти налаштування",
+                completedStat: "Проведено",
+                todayStat: "Уроки сьогодні",
+                studentsStat: "Студенти",
+                earnedStat: "Зароблено",
+                badgeList: "👥 Список",
+                studentsSection: "Студенти",
+                studentNamePh: "Ім'я",
+                studentRatePh: "Ставка (₴)",
+                addStudentBtn: "Додати студента",
+                scheduleSection: "Запланувати урок",
+                selectStudentDef: "Оберіть студента",
+                addLessonBtn: "+ Запланувати урок",
+                scheduleTitle: "Розклад занять",
+                noLessons: "Немає уроків",
+                todayTag: "• СЬОГОДНІ",
+                expandSch: "Показати інші дні ▼",
+                collapseSch: "Згорнути розклад ▲",
+                modalTitle: "Ваші учні 🎓",
+                noStudentsYet: "Студентів поки немає",
+                freeLimitTag: "Безкоштовно",
+                proLimitTag: "PRO: Безліміт",
+                paywallDesc: "Ви досягли ліміту безкоштовної версії (3 учні). Перейдіть на PRO, щоб вести бізнес без обмежень!",
+                paywallFeat: "<div>✅ <b>Необмежена</b> кількість учнів</div><div>✅ Авто-сповіщення уроків у Telegram</div><div>✅ Повна статистика доходів і занять</div><div>✅ Пріоритетна підтримка</div>",
+                perMonth: "/ місяць",
+                subProBtn: "Оформити PRO підписку",
+                unit: "ур."
+            },
+            en: {
+                days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                teacherNameLbl: "Teacher's Name",
+                teacherNamePh: "Enter your name...",
+                zoomUrlLbl: "Zoom Link",
+                zoomUrlPh: "Paste Zoom link...",
+                saveSettingsBtn: "Save Settings",
+                completedStat: "Completed",
+                todayStat: "Lessons Today",
+                studentsStat: "Students",
+                earnedStat: "Earned",
+                badgeList: "👥 List",
+                studentsSection: "Students",
+                studentNamePh: "Name",
+                studentRatePh: "Rate (₴)",
+                addStudentBtn: "Add Student",
+                scheduleSection: "Schedule Lesson",
+                selectStudentDef: "Select a student",
+                addLessonBtn: "+ Schedule Lesson",
+                scheduleTitle: "Lesson Schedule",
+                noLessons: "No lessons",
+                todayTag: "• TODAY",
+                expandSch: "Show other days ▼",
+                collapseSch: "Collapse schedule ▲",
+                modalTitle: "Your Students 🎓",
+                noStudentsYet: "No students yet",
+                freeLimitTag: "Free",
+                proLimitTag: "PRO: Unlimited",
+                paywallDesc: "You reached the limit of the free version (3 students). Upgrade to PRO to run your business without limits!",
+                paywallFeat: "<div>✅ <b>Unlimited</b> number of students</div><div>✅ Auto-reminders in Telegram</div><div>✅ Full income & lesson analytics</div><div>✅ Priority support</div>",
+                perMonth: "/ month",
+                subProBtn: "Get PRO Subscription",
+                unit: "les."
+            }
+        };
 
         let teacherName = tgUser ? (tgUser.first_name || '') : '';
         let isPremium = false;
@@ -657,12 +773,49 @@
 
         document.getElementById('lessonDate').valueAsDate = new Date();
 
+        function changeLanguage(lang) {
+            currentLang = lang;
+            applyLocalization();
+            render();
+        }
+
+        function applyLocalization() {
+            const t = i18n[currentLang] || i18n.ru;
+            
+            document.getElementById('lblTeacherName').innerText = t.teacherNameLbl;
+            document.getElementById('teacherNameInput').placeholder = t.teacherNamePh;
+            document.getElementById('lblZoomUrl').innerText = t.zoomUrlLbl;
+            document.getElementById('zoomUrl').placeholder = t.zoomUrlPh;
+            document.getElementById('btnSaveSettings').innerText = t.saveSettingsBtn;
+
+            document.getElementById('lblCompletedStat').innerText = t.completedStat;
+            document.getElementById('lblTodayStat').innerText = t.todayStat;
+            document.getElementById('lblStudentsStat').innerText = t.studentsStat;
+            document.getElementById('lblEarnedStat').innerText = t.earnedStat;
+            document.getElementById('btnStudentBadge').innerText = t.badgeList;
+
+            document.getElementById('lblStudentsSection').innerText = t.studentsSection;
+            document.getElementById('studentName').placeholder = t.studentNamePh;
+            document.getElementById('studentRate').placeholder = t.studentRatePh;
+            document.getElementById('btnAddStudent').innerText = t.addStudentBtn;
+
+            document.getElementById('lblScheduleSection').innerText = t.scheduleSection;
+            document.getElementById('btnAddLesson').innerText = t.addLessonBtn;
+            document.getElementById('lblScheduleTitle').innerText = t.scheduleTitle;
+
+            document.getElementById('lblModalTitle').innerText = t.modalTitle;
+            document.getElementById('lblPaywallDesc').innerText = t.paywallDesc;
+            document.getElementById('lblPaywallFeatures').innerHTML = t.paywallFeat;
+            document.getElementById('lblPerMonth').innerText = t.perMonth;
+            document.getElementById('btnSubscribePro').innerText = t.subProBtn;
+        }
+
         function startVoiceStudentAdd(btnEl) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) return alert('Голосовой ввод не поддерживается браузером.');
 
             const recognition = new SpeechRecognition();
-            recognition.lang = 'ru-RU';
+            recognition.lang = currentLang === 'uk' ? 'uk-UA' : (currentLang === 'en' ? 'en-US' : 'ru-RU');
             recognition.interimResults = false;
 
             btnEl.classList.add('listening');
@@ -675,7 +828,7 @@
                     document.getElementById('studentRate').value = numbers[0];
                 }
                 
-                const nameCleaned = text.replace(/\d+/g, '').replace(/(рублей|гривен|ставка|руб|грн)/gi, '').trim();
+                const nameCleaned = text.replace(/\d+/g, '').replace(/(рублей|гривен|ставка|руб|грн|гривень|rate)/gi, '').trim();
                 if (nameCleaned) {
                     document.getElementById('studentName').value = nameCleaned.charAt(0).toUpperCase() + nameCleaned.slice(1);
                 }
@@ -691,7 +844,7 @@
             if (!SpeechRecognition) return alert('Голосовой ввод не поддерживается браузером.');
 
             const recognition = new SpeechRecognition();
-            recognition.lang = 'ru-RU';
+            recognition.lang = currentLang === 'uk' ? 'uk-UA' : (currentLang === 'en' ? 'en-US' : 'ru-RU');
             recognition.interimResults = false;
 
             btnEl.classList.add('listening');
@@ -715,22 +868,9 @@
                 }
 
                 const now = new Date();
-                if (text.includes('завтра')) {
+                if (text.includes('завтра') || text.includes('tomorrow')) {
                     now.setDate(now.getDate() + 1);
                     document.getElementById('lessonDate').valueAsDate = now;
-                } else {
-                    const daysMap = {'понедельник': 1, 'вторник': 2, 'среда': 3, 'четверг': 4, 'пятница': 5, 'суббота': 6, 'воскресенье': 0};
-                    for (let day in daysMap) {
-                        if (text.includes(day)) {
-                            let targetDay = daysMap[day];
-                            let currentDay = now.getDay();
-                            let diff = targetDay - currentDay;
-                            if (diff <= 0) diff += 7;
-                            now.setDate(now.getDate() + diff);
-                            document.getElementById('lessonDate').valueAsDate = now;
-                            break;
-                        }
-                    }
                 }
             };
 
@@ -752,13 +892,14 @@
         }
 
         function openStudentsModal() {
+            const t = i18n[currentLang] || i18n.ru;
             const listEl = document.getElementById('modalStudentsList');
             listEl.innerHTML = students.length === 0 
-                ? '<p style="color:#94a3b8; font-size:13px; text-align:center;">Студентов пока нет</p>'
+                ? `<p style="color:#94a3b8; font-size:13px; text-align:center;">${t.noStudentsYet}</p>`
                 : students.map(s => `
                     <div class="modal-student-item">
                         <span>👤 ${s.name}</span>
-                        <span style="color:var(--primary);">${s.rate} ₴/урок</span>
+                        <span style="color:var(--primary);">${s.rate} ₴</span>
                     </div>
                 `).join('');
             document.getElementById('studentsModal').classList.add('active');
@@ -786,10 +927,11 @@
 
         function toggleSchedule() {
             isExpanded = !isExpanded;
+            const t = i18n[currentLang] || i18n.ru;
             const block = document.getElementById('otherDaysBlock');
             const btnText = document.getElementById('toggleBtnText');
             if (block) block.classList.toggle('show', isExpanded);
-            if (btnText) btnText.innerText = isExpanded ? 'Свернуть расписание ▲' : 'Показать остальные дни ▼';
+            if (btnText) btnText.innerText = isExpanded ? t.collapseSch : t.expandSch;
         }
 
         async function registerUserInDb() {
@@ -817,6 +959,7 @@
                 try {
                     await db.from('config').upsert({ key: `teacher_name_${userId}`, value: teacherName });
                     await db.from('config').upsert({ key: `zoom_url_${userId}`, value: zoomUrl });
+                    await db.from('config').upsert({ key: `lang_${userId}`, value: currentLang });
                 } catch(e) {}
             }
 
@@ -833,7 +976,7 @@
 
             const name = document.getElementById('studentName').value.trim();
             const rate = parseFloat(document.getElementById('studentRate').value);
-            if (!name || isNaN(rate)) return alert('Заполните имя и ставку!');
+            if (!name || isNaN(rate)) return alert('Заполните данные!');
 
             const newStudent = { name, rate, user_id: userId };
 
@@ -865,7 +1008,7 @@
             const dateVal = document.getElementById('lessonDate').value;
             const timeVal = document.getElementById('lessonTime').value;
             const studentId = parseInt(document.getElementById('lessonStudentSelect').value);
-            if (!dateVal || !timeVal || !studentId) return alert('Заполните дату, время и выберите студента!');
+            if (!dateVal || !timeVal || !studentId) return alert('Заполните данные!');
 
             const student = students.find(s => s.id === studentId);
             const newLesson = {
@@ -919,15 +1062,16 @@
         }
 
         function render() {
+            const t = i18n[currentLang] || i18n.ru;
             const limitTag = document.getElementById('limitTag');
             const headerPlanText = document.getElementById('headerPlanText');
 
             if (isPremium) {
-                limitTag.innerText = 'PRO: Безлимит';
+                limitTag.innerText = t.proLimitTag;
                 limitTag.className = 'limit-info-tag pro';
                 headerPlanText.innerText = 'PRO';
             } else {
-                limitTag.innerText = `Бесплатно: ${students.length} / ${FREE_STUDENT_LIMIT}`;
+                limitTag.innerText = `${t.freeLimitTag}: ${students.length} / ${FREE_STUDENT_LIMIT}`;
                 limitTag.className = 'limit-info-tag';
                 headerPlanText.innerText = 'Free';
             }
@@ -944,7 +1088,7 @@
 
             const studentSelectEl = document.getElementById('lessonStudentSelect');
             if (studentSelectEl) {
-                studentSelectEl.innerHTML = '<option value="">Выберите студента</option>' + 
+                studentSelectEl.innerHTML = `<option value="">${t.selectStudentDef}</option>` + 
                     students.map(s => `<option value="${s.id}">${s.name} (${s.rate} ₴)</option>`).join('');
             }
 
@@ -989,11 +1133,11 @@
 
                 if (isToday) todayLessonsCountVal = dayLessons.length;
 
-                const dayName = daysOfWeek[dateObj.getDay()];
-                const formattedDate = `${dayName}, ${dateObj.getDate()} ${months[dateObj.getMonth()]}`;
+                const dayName = t.days[dateObj.getDay()];
+                const formattedDate = `${dayName}, ${dateObj.getDate()} ${t.months[dateObj.getMonth()]}`;
 
                 let lessonsHtml = dayLessons.length === 0 
-                    ? '<div class="no-lessons">Нет уроков</div>'
+                    ? `<div class="no-lessons">${t.noLessons}</div>`
                     : dayLessons.map(l => `
                         <div class="lesson-card ${l.completed ? 'completed' : ''}">
                             <div class="lesson-info">
@@ -1013,8 +1157,8 @@
                 return `
                     <div class="day-column ${isToday ? 'is-today' : ''}" ${isToday ? 'onclick="toggleSchedule()"' : ''} style="${isToday ? 'cursor:pointer;' : ''}">
                         <div class="day-header">
-                            <span>${formattedDate} ${isToday ? '• СЕГОДНЯ' : ''}</span>
-                            <span>${dayLessons.length} ур.</span>
+                            <span>${formattedDate} ${isToday ? t.todayTag : ''}</span>
+                            <span>${dayLessons.length} ${t.unit}</span>
                         </div>
                         <div class="lessons-list">${lessonsHtml}</div>
                     </div>
@@ -1026,7 +1170,7 @@
                 let html = buildCardHtml(todayObj, true);
                 html += `
                     <div class="expand-toggle-btn" onclick="toggleSchedule()">
-                        <span id="toggleBtnText">${isExpanded ? 'Свернуть расписание ▲' : 'Показать остальные дни ▼'}</span>
+                        <span id="toggleBtnText">${isExpanded ? t.collapseSch : t.expandSch}</span>
                     </div>
                 `;
                 html += `
@@ -1066,8 +1210,14 @@
                         teacherName = tItem.value || teacherName;
                         document.getElementById('teacherNameInput').value = teacherName;
                     }
+                    const lItem = cfgData.find(c => c.key === `lang_${userId}`);
+                    if (lItem) {
+                        currentLang = lItem.value || 'ru';
+                        document.getElementById('langSelect').value = currentLang;
+                    }
                 }
 
+                applyLocalization();
                 updateAppTitle();
                 render();
             } catch (err) {
@@ -1075,6 +1225,7 @@
             }
         }
 
+        applyLocalization();
         render();
         loadSupabaseData();
     </script>
