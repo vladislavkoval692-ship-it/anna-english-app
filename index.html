@@ -152,24 +152,6 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
-        .mic-btn-action {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .listening {
-            background: rgba(239, 68, 68, 0.2) !important;
-            border-color: var(--danger) !important;
-        }
-
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -241,12 +223,6 @@
             background: rgba(245, 158, 11, 0.15);
             color: var(--gold);
             border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .limit-info-tag.pro {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-            border-color: rgba(16, 185, 129, 0.3);
         }
 
         .form-grid {
@@ -438,7 +414,7 @@
     <header class="app-header">
         <div class="app-title" id="appTitle">English School</div>
         <div class="header-actions">
-            <button class="btn-premium-badge" onclick="openPaywallModal()">⭐ <span id="headerPlanText">Free</span></button>
+            <button class="btn-premium-badge">⭐ <span id="headerPlanText">Free</span></button>
             <button class="btn-zoom-main" onclick="openZoomLink()">🎥 Zoom</button>
             <button class="btn-icon-top" onclick="toggleSettingsInput()">⚙️</button>
         </div>
@@ -446,22 +422,22 @@
 
     <div class="settings-bar" id="settingsBar">
         <div class="settings-field">
-            <label id="lblLang">Язык / Language</label>
+            <label id="lblLang">Мова / Language</label>
             <div class="lang-selector">
-                <button class="lang-btn active" data-lang="ru" onclick="selectLang('ru')">Русский</button>
-                <button class="lang-btn" data-lang="uk" onclick="selectLang('uk')">Українська</button>
+                <button class="lang-btn" data-lang="ru" onclick="selectLang('ru')">Русский</button>
+                <button class="lang-btn active" data-lang="uk" onclick="selectLang('uk')">Українська</button>
                 <button class="lang-btn" data-lang="en" onclick="selectLang('en')">English</button>
             </div>
         </div>
         <div class="settings-field">
-            <label id="lblTeacherName">Имя преподавателя</label>
-            <input type="text" id="teacherNameInput" placeholder="Укажите ваше имя...">
+            <label id="lblTeacherName">Ім'я викладача</label>
+            <input type="text" id="teacherNameInput" placeholder="Вкажіть ваше ім'я...">
         </div>
         <div class="settings-field">
-            <label id="lblZoomUrl">Ссылка на Zoom</label>
-            <input type="text" id="zoomUrl" placeholder="Вставьте ссылку на Zoom...">
+            <label id="lblZoomUrl">Посилання на Zoom</label>
+            <input type="text" id="zoomUrl" placeholder="Вставте посилання...">
         </div>
-        <button class="btn-primary" style="padding: 10px;" id="btnSaveSettings" onclick="saveSettings()">Сохранить настройки</button>
+        <button class="btn-primary" style="padding: 10px;" id="btnSaveSettings" onclick="saveSettings()">Зберегти налаштування</button>
     </div>
 
     <div class="stats-grid">
@@ -470,60 +446,60 @@
             <div class="value" id="completedLessonsCount">0 / 0</div>
         </div>
         <div class="stat-card">
-            <h3 id="lblTodayStat">Уроки сегодня</h3>
+            <h3 id="lblTodayStat">Уроки сьогодні</h3>
             <div class="value" id="todayLessonsCount">0</div>
         </div>
         <div class="stat-card" style="cursor:pointer;" onclick="openStudentsModal()">
-            <h3 id="lblStudentsStat">Студенты</h3>
+            <h3 id="lblStudentsStat">Студенти</h3>
             <div class="value">
                 <span id="totalStudentsCount">0</span>
                 <span class="student-badge-btn" id="btnStudentBadge">👥 Список</span>
             </div>
         </div>
         <div class="stat-card">
-            <h3 id="lblEarnedStat">Заработано</h3>
+            <h3 id="lblEarnedStat">Зароблено</h3>
             <div class="value" id="earnedIncome">0 ₴</div>
         </div>
     </div>
 
     <div class="section-box">
         <div class="section-header-flex">
-            <div class="section-title" id="lblStudentsSection">Студенты</div>
-            <div class="limit-info-tag" id="limitTag">Лимит: 0 / 3</div>
+            <div class="section-title" id="lblStudentsSection">Студенти</div>
+            <div class="limit-info-tag" id="limitTag">Безкоштовно: 0 / 3</div>
         </div>
         <div class="form-grid">
-            <input type="text" id="studentName" placeholder="Имя">
+            <input type="text" id="studentName" placeholder="Ім'я">
             <input type="number" id="studentRate" placeholder="Ставка (₴)">
         </div>
         <div class="form-actions">
-            <button class="btn-primary" id="btnAddStudent" onclick="addStudent()">Добавить студента</button>
+            <button class="btn-primary" id="btnAddStudent" onclick="addStudent()">Додати студента</button>
         </div>
         <div class="students-list" id="studentsList"></div>
     </div>
 
     <div class="section-box">
-        <div class="section-title" id="lblScheduleSection" style="margin-bottom: 12px;">Запланировать урок</div>
+        <div class="section-title" id="lblScheduleSection" style="margin-bottom: 12px;">Запланувати урок</div>
         <div class="form-grid">
             <input type="date" id="lessonDate">
             <input type="time" id="lessonTime" value="15:00">
         </div>
         <div class="form-grid full" style="margin-bottom: 8px;">
             <select id="lessonStudentSelect">
-                <option value="">Выберите студента</option>
+                <option value="">Оберіть студента</option>
             </select>
         </div>
         <div class="form-actions">
-            <button class="btn-primary" id="btnAddLesson" onclick="addLesson()">+ Запланировать урок</button>
+            <button class="btn-primary" id="btnAddLesson" onclick="addLesson()">+ Запланувати урок</button>
         </div>
     </div>
 
-    <div class="section-title" id="lblScheduleTitle" style="margin: 18px 2px 10px 2px;">Расписание занятий</div>
+    <div class="section-title" id="lblScheduleTitle" style="margin: 18px 2px 10px 2px;">Розклад занять</div>
     <div class="week-container" id="weekGrid"></div>
 
     <div class="modal-overlay" id="studentsModal" onclick="closeStudentsModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <div class="modal-title" id="lblModalTitle">Ваши ученики 🎓</div>
+                <div class="modal-title" id="lblModalTitle">Ваши учні 🎓</div>
                 <button class="modal-close" onclick="closeStudentsModal()">✕</button>
             </div>
             <div id="modalStudentsList" style="text-align:left;"></div>
@@ -603,13 +579,12 @@
         };
 
         let teacherName = tgUser ? (tgUser.first_name || '') : '';
-        let isPremium = false;
         
-        // СЧИТЫВАЕМ ИЗ LOCALSTORAGE ЕСЛИ ЕСТЬ
+        // Чтение сохранённых локально данных
         let students = JSON.parse(localStorage.getItem('app_students_' + userId) || '[]');
         let lessons = JSON.parse(localStorage.getItem('app_lessons_' + userId) || '[]');
-        
         let zoomUrl = localStorage.getItem('app_zoom_' + userId) || '';
+        
         let isExpanded = false;
         const FREE_STUDENT_LIMIT = 3;
 
@@ -708,6 +683,8 @@
             if (!name || isNaN(rate)) return alert('Заполните данные!');
 
             const newStudent = { id: Date.now(), name, rate, user_id: userId };
+            
+            // 1. Сохранение локально
             students.push(newStudent);
             saveLocal();
 
@@ -715,10 +692,14 @@
             document.getElementById('studentRate').value = '';
             render();
 
+            // 2. Отправка в Supabase
             if (db) {
                 try {
-                    await db.from('students').insert([newStudent]);
-                } catch(e) { console.error("Database save failed, using local", e); }
+                    const { error } = await db.from('students').insert([newStudent]);
+                    if (error) console.error("Supabase insert error:", error.message);
+                } catch(e) {
+                    console.error("Supabase connection error:", e);
+                }
             }
         }
 
@@ -899,15 +880,29 @@
         async function loadSupabaseData() {
             if (!db) return;
             try {
-                const { data: stData } = await db.from('students').select('*').eq('user_id', userId);
-                if (stData && stData.length > 0) {
-                    students = stData;
+                // Загружаем студентов из Supabase без сброса локальных данных
+                const { data: stData, error: stErr } = await db.from('students').select('*').eq('user_id', userId);
+                if (!stErr && stData && stData.length > 0) {
+                    const combined = [...students];
+                    stData.forEach(serverSt => {
+                        if (!combined.some(localSt => localSt.id === serverSt.id)) {
+                            combined.push(serverSt);
+                        }
+                    });
+                    students = combined;
                     saveLocal();
                 }
 
-                const { data: lsData } = await db.from('lessons').select('*').eq('user_id', userId);
-                if (lsData && lsData.length > 0) {
-                    lessons = lsData;
+                // Загружаем уроки
+                const { data: lsData, error: lsErr } = await db.from('lessons').select('*').eq('user_id', userId);
+                if (!lsErr && lsData && lsData.length > 0) {
+                    const combinedLessons = [...lessons];
+                    lsData.forEach(serverLs => {
+                        if (!combinedLessons.some(localLs => localLs.id === serverLs.id)) {
+                            combinedLessons.push(serverLs);
+                        }
+                    });
+                    lessons = combinedLessons;
                     saveLocal();
                 }
 
