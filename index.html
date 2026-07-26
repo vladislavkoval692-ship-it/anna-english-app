@@ -245,11 +245,11 @@
             font-weight: bold;
         }
 
-        /* --- РАСПИСАНИЕ И АНИМИРОВАННЫЕ ДНИ --- */
-        .week-grid {
+        /* --- РАСПИСАНИЕ --- */
+        .week-container {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             margin-top: 10px;
         }
 
@@ -258,15 +258,13 @@
             border-radius: var(--radius);
             padding: 14px;
             border: 1px solid var(--border);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Сегодняшний день (кнопка разворачивания) */
+        /* Карточка "Сегодня" */
         .day-column.is-today {
             border: 2px solid var(--primary);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
-            cursor: pointer;
-            user-select: none;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+            background: linear-gradient(180deg, #1e293b 0%, #1e293b 100%);
         }
 
         .day-header {
@@ -282,40 +280,43 @@
 
         .day-column.is-today .day-header { color: var(--primary); }
 
-        .toggle-arrow {
-            font-size: 12px;
-            transition: transform 0.3s ease;
-            background: rgba(59, 130, 246, 0.1);
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
-
-        .toggle-arrow.open {
-            transform: rotate(180deg);
-        }
-
-        /* Выплывающий контейнер остальных дней */
-        .other-days-wrapper {
-            display: grid;
-            grid-template-rows: 0fr;
-            transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .other-days-wrapper.open {
-            grid-template-rows: 1fr;
-        }
-
-        .other-days-inner {
-            overflow: hidden;
+        /* Кнопка-переключатель раскрытия */
+        .expand-toggle-btn {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--primary);
+            border: 1px dashed rgba(59, 130, 246, 0.4);
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding-top: 0;
-            transition: padding 0.35s ease;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
         }
 
-        .other-days-wrapper.open .other-days-inner {
-            padding-top: 12px;
+        .expand-toggle-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Выплывающий блок */
+        .other-days-block {
+            display: none; /* По умолчанию скрыт */
+            flex-direction: column;
+            gap: 10px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .other-days-block.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .no-lessons {
@@ -531,7 +532,7 @@
     </div>
 
     <div class="section-title" style="margin: 18px 2px 10px 2px;">Расписание занятий</div>
-    <div class="week-grid" id="weekGrid"></div>
+    <div class="week-container" id="weekGrid"></div>
 
     <div class="modal-overlay" id="studentsModal" onclick="closeStudentsModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
@@ -569,7 +570,7 @@
         let lessons = [];
         let zoomUrl = '';
         let toastTimeout = null;
-        let isWeekExpanded = false; // Состояние развернутости дней
+        let isExpanded = false; // Состояние открытости расписания
 
         document.getElementById('lessonDate').valueAsDate = new Date();
 
@@ -619,12 +620,12 @@
             document.getElementById('appTitle').innerText = teacherName ? `${teacherName}'s English School` : `English School`;
         }
 
-        function toggleWeekAccordion() {
-            isWeekExpanded = !isWeekExpanded;
-            const wrapper = document.getElementById('otherDaysWrapper');
-            const arrow = document.getElementById('toggleArrow');
-            if (wrapper) wrapper.classList.toggle('open', isWeekExpanded);
-            if (arrow) arrow.classList.toggle('open', isWeekExpanded);
+        function toggleSchedule() {
+            isExpanded = !isExpanded;
+            const block = document.getElementById('otherDaysBlock');
+            const btnText = document.getElementById('toggleBtnText');
+            if (block) block.classList.toggle('show', isExpanded);
+            if (btnText) btnText.innerText = isExpanded ? 'Свернуть расписание ▲' : 'Показать остальные дни ▼';
         }
 
         async function saveSettings() {
@@ -746,7 +747,7 @@
                     students.map(s => `<option value="${s.id}">${s.name} (${s.rate} ₴)</option>`).join('');
             }
 
-            // Даты недели (Пн-Вс)
+            // Даты недели
             const now = new Date();
             const todayStr = formatDateStr(now);
 
@@ -781,11 +782,11 @@
                 }
             });
 
-            // Разделяем сегодня и остальные дни
+            // Находим сегодняшний день и остальные дни
             const todayObj = weekDays.find(d => d.dateKey === todayStr) || { dateKey: todayStr, dateObj: now };
             const otherDays = weekDays.filter(d => d.dateKey !== todayStr);
 
-            function generateDayHtml(dayInfo, isToday = false) {
+            function buildCardHtml(dayInfo, isToday = false) {
                 const dateKey = dayInfo.dateKey;
                 const dateObj = dayInfo.dateObj;
                 const dayLessons = (groupedLessons[dateKey] || []).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
@@ -798,7 +799,7 @@
                 let lessonsHtml = dayLessons.length === 0 
                     ? '<div class="no-lessons">Нет уроков</div>'
                     : dayLessons.map(l => `
-                        <div class="lesson-card ${l.completed ? 'completed' : ''}" onclick="event.stopPropagation()">
+                        <div class="lesson-card ${l.completed ? 'completed' : ''}">
                             <div class="lesson-info">
                                 <span class="lesson-time">${l.time || '15:00'} ${l.completed ? '✓' : ''}</span>
                                 <span class="lesson-student">${l.student_name || 'Студент'} (${l.rate || 0}₴)</span>
@@ -813,26 +814,10 @@
                         </div>
                     `).join('');
 
-                if (isToday) {
-                    return `
-                        <div class="day-column is-today" onclick="toggleWeekAccordion()">
-                            <div class="day-header">
-                                <span>${formattedDate} • Сегодня (${dayLessons.length} ур.)</span>
-                                <span class="toggle-arrow ${isWeekExpanded ? 'open' : ''}" id="toggleArrow">
-                                    ${isWeekExpanded ? 'Свернуть ▲' : 'Вся неделя ▼'}
-                                </span>
-                            </div>
-                            <div class="lessons-list">
-                                ${lessonsHtml}
-                            </div>
-                        </div>
-                    `;
-                }
-
                 return `
-                    <div class="day-column">
+                    <div class="day-column ${isToday ? 'is-today' : ''}" ${isToday ? 'onclick="toggleSchedule()"' : ''} style="${isToday ? 'cursor:pointer;' : ''}">
                         <div class="day-header">
-                            <span>${formattedDate}</span>
+                            <span>${formattedDate} ${isToday ? '• СЕГОДНЯ' : ''}</span>
                             <span>${dayLessons.length} ур.</span>
                         </div>
                         <div class="lessons-list">
@@ -844,13 +829,20 @@
 
             const weekGridEl = document.getElementById('weekGrid');
             if (weekGridEl) {
-                let html = generateDayHtml(todayObj, true);
+                // 1. Сначала карточка "СЕГОДНЯ"
+                let html = buildCardHtml(todayObj, true);
 
+                // 2. Синяя кнопка управления разворачиванием
                 html += `
-                    <div class="other-days-wrapper ${isWeekExpanded ? 'open' : ''}" id="otherDaysWrapper">
-                        <div class="other-days-inner">
-                            ${otherDays.map(d => generateDayHtml(d, false)).join('')}
-                        </div>
+                    <div class="expand-toggle-btn" onclick="toggleSchedule()">
+                        <span id="toggleBtnText">${isExpanded ? 'Свернуть расписание ▲' : 'Показать остальные дни ▼'}</span>
+                    </div>
+                `;
+
+                // 3. Выплывающий список остальных дней
+                html += `
+                    <div class="other-days-block ${isExpanded ? 'show' : ''}" id="otherDaysBlock">
+                        ${otherDays.map(d => buildCardHtml(d, false)).join('')}
                     </div>
                 `;
 
