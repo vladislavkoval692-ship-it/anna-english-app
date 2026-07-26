@@ -118,7 +118,6 @@
             text-transform: uppercase;
         }
 
-        /* КНОПКА МИКРОФОНА РЯДОМ С ОСНОВНЫМИ КНОПКАМИ */
         .mic-btn-action {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -280,7 +279,6 @@
             font-weight: bold;
         }
 
-        /* --- РАСПИСАНИЕ --- */
         .week-container {
             display: flex;
             flex-direction: column;
@@ -423,7 +421,6 @@
         .btn-success-sm { background: var(--success); color: white; }
         .btn-danger-sm { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
-        /* --- МОДАЛЬНЫЕ ОКНА --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -552,7 +549,7 @@
         </div>
     </div>
 
-    <!-- БЛОК ДОБАВЛЕНИЯ СТУДЕНТА (Микрофон перенесен к кнопке) -->
+    <!-- БЛОК ДОБАВЛЕНИЯ СТУДЕНТА -->
     <div class="section-box">
         <div class="section-header-flex">
             <div class="section-title">Студенты</div>
@@ -569,7 +566,7 @@
         <div class="students-list" id="studentsList"></div>
     </div>
 
-    <!-- БЛОК ЗАПЛАНИРОВАТЬ УРОК (Микрофон рядом с кнопкой) -->
+    <!-- БЛОК ЗАПЛАНИРОВАТЬ УРОК -->
     <div class="section-box">
         <div class="section-title" style="margin-bottom: 12px;">Запланировать урок</div>
         <div class="form-grid">
@@ -660,7 +657,6 @@
 
         document.getElementById('lessonDate').valueAsDate = new Date();
 
-        /* --- ГОЛОСОВОЙ ВВОД ДЛЯ ДОБАВЛЕНИЯ СТУДЕНТА (Имя + Ставка) --- */
         function startVoiceStudentAdd(btnEl) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) return alert('Голосовой ввод не поддерживается браузером.');
@@ -674,7 +670,6 @@
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript;
                 
-                // Вытаскиваем цифры (ставку), всё остальное считаем именем
                 const numbers = text.match(/\d+/g);
                 if (numbers) {
                     document.getElementById('studentRate').value = numbers[0];
@@ -691,7 +686,6 @@
             recognition.start();
         }
 
-        /* --- ГОЛОСОВОЙ ВВОД ДЛЯ ЗАПЛАНИРОВАНИЯ УРОКА --- */
         function startVoiceLessonSchedule(btnEl) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) return alert('Голосовой ввод не поддерживается браузером.');
@@ -705,13 +699,11 @@
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript.toLowerCase();
                 
-                // 1. Поиск студента
                 const matchedStudent = students.find(s => text.includes(s.name.toLowerCase()));
                 if (matchedStudent) {
                     document.getElementById('lessonStudentSelect').value = matchedStudent.id;
                 }
 
-                // 2. Поиск времени
                 const timeMatch = text.match(/(\d{1,2})[:\s]?(\d{2})?/);
                 if (timeMatch) {
                     let hours = parseInt(timeMatch[1]);
@@ -722,7 +714,6 @@
                     }
                 }
 
-                // 3. Поиск даты
                 const now = new Date();
                 if (text.includes('завтра')) {
                     now.setDate(now.getDate() + 1);
