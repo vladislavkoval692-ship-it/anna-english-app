@@ -138,6 +138,23 @@
             cursor: pointer;
             padding: 0 8px;
         }
+
+        .badge-vip {
+            display: inline-block;
+            background: #ffcc00;
+            color: #000;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        .limit-counter {
+            font-size: 12px;
+            color: var(--hint-color);
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
@@ -190,6 +207,7 @@
     <div id="students" class="content-section">
         <div class="card">
             <h3>Новый ученик</h3>
+            <div id="student-limit-info" class="limit-counter"></div>
             <div class="input-group">
                 <label>Имя ученика</label>
                 <input type="text" id="student-name" placeholder="Например: Иван">
@@ -221,15 +239,23 @@
         const SUPABASE_KEY = 'sb_publishable__yFLFUaOvySO0Kfq3kynaw_AltSdqzX';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // 👑 СПИСОК VIP ПОЛЬЗОВАТЕЛЕЙ БЕЗ ОГРАНИЧЕНИЙ (Добавь сюда Telegram ID Анны)
+        // Если ID Анны, например, 123456789, впиши: ['123456789', 'test_user_123']
+        const VIP_USER_IDS = ['test_user_123']; 
+        const MAX_FREE_STUDENTS = 5;
+
         const tg = window.Telegram?.WebApp;
         if (tg) tg.expand();
 
         const user = tg?.initDataUnsafe?.user || { id: 'test_user_123', first_name: 'Анна' };
+        const isVipUser = VIP_USER_IDS.includes(String(user.id));
 
         let students = [];
         let lessons = [];
 
-        document.getElementById('user-greeting').innerText = `Привет, ${user.first_name}! 👋`;
+        // Отображение имени и статуса
+        const greetingEl = document.getElementById('user-greeting');
+        greetingEl.innerHTML = `Привет, ${user.first_name}! 👋 ${isVipUser ? '<span class="badge-vip">PRO VIP</span>' : ''}`;
 
         async function init() {
             await ensureProfile();
@@ -273,6 +299,15 @@
 
             if (!name) return alert('Введите имя ученика');
 
+            // ПРОВЕРКА ЛИМИТА: если пользователь НЕ в списке VIP и у него уже >= 5 учеников
+            if (!isVipUser && students.length >= MAX_FREE_STUDENTS) {
+                alert(
+                    `🚀 Вы достигли лимита бесплатного тарифа (${MAX_FREE_STUDENTS} учеников)!\n\n` +
+                    `Для снятия ограничений и подключения всех бизнес-фич свяжитесь с разработчиком для оформления PRO-подписки.`
+                );
+                return;
+            }
+
             const { data, error } = await supabase.from('students').insert([{
                 user_id: String(user.id),
                 name,
@@ -296,9 +331,19 @@
         function renderStudents() {
             const list = document.getElementById('students-list');
             const select = document.getElementById('lesson-student-select');
+            const limitInfo = document.getElementById('student-limit-info');
             
             list.innerHTML = '';
             select.innerHTML = '';
+
+            // Обновляем информацию о лимите
+            if (isVipUser) {
+                limitInfo.innerText = 'У вас подключен VIP-доступ (безлимит)';
+                limitInfo.style.color = '#34c759';
+            } else {
+                limitInfo.innerText = `Использовано мест: ${students.length} из ${MAX_FREE_STUDENTS} (Бесплатный тариф)`;
+                limitInfo.style.color = students.length >= MAX_FREE_STUDENTS ? '#ff3b30' : '#8e8e93';
+            }
 
             if (students.length === 0) {
                 list.innerHTML = '<p style="color: var(--hint-color);">Учеников пока нет</p>';
