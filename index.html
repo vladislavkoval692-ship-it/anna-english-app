@@ -95,12 +95,12 @@
         .settings-bar {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 14px;
+            padding: 14px;
+            border-radius: 16px;
             margin-bottom: 14px;
             display: none;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .settings-bar.active { display: flex; }
@@ -108,7 +108,7 @@
         .settings-field {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .settings-field label {
@@ -116,6 +116,46 @@
             font-weight: 700;
             color: var(--text-sub);
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Стильный Segmented Control для языка */
+        .lang-selector {
+            display: flex;
+            background: var(--bg);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            gap: 4px;
+        }
+
+        .lang-btn {
+            flex: 1;
+            background: transparent;
+            color: var(--text-sub);
+            border: none;
+            padding: 8px 10px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .lang-btn.active {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .lang-btn:hover:not(.active) {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .mic-btn-action {
@@ -515,15 +555,21 @@
         </div>
     </header>
 
-    <!-- НАСТРОЙКИ (С ВЫБОРОМ ЯЗЫКА) -->
+    <!-- НАСТРОЙКИ С КРАСИВЫМИ КНОПКАМИ ЯЗЫКА -->
     <div class="settings-bar" id="settingsBar">
         <div class="settings-field">
-            <label id="lblLang">Language / Язык 🌐</label>
-            <select id="langSelect" onchange="changeLanguage(this.value)">
-                <option value="ru">🇷🇺 Русский</option>
-                <option value="uk">🇺🇦 Українська</option>
-                <option value="en">🇬🇧 English</option>
-            </select>
+            <label id="lblLang">Язык / Language</label>
+            <div class="lang-selector">
+                <button class="lang-btn active" data-lang="ru" onclick="selectLang('ru')">
+                    <span>🇷🇺</span> Русский
+                </button>
+                <button class="lang-btn" data-lang="uk" onclick="selectLang('uk')">
+                    <span>🇺🇦</span> Укр
+                </button>
+                <button class="lang-btn" data-lang="en" onclick="selectLang('en')">
+                    <span>🇬🇧</span> Eng
+                </button>
+            </div>
         </div>
         <div class="settings-field">
             <label id="lblTeacherName">Имя преподавателя</label>
@@ -652,7 +698,7 @@
             }
         } catch (e) {}
 
-        // --- ЛОКАЛИЗАЦИЯ (ИЗЫКИ) ---
+        // --- ЛОКАЛИЗАЦИЯ ---
         let currentLang = 'ru';
         const i18n = {
             ru: {
@@ -773,8 +819,15 @@
 
         document.getElementById('lessonDate').valueAsDate = new Date();
 
-        function changeLanguage(lang) {
+        function selectLang(lang) {
             currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
             applyLocalization();
             render();
         }
@@ -822,12 +875,10 @@
 
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript;
-                
                 const numbers = text.match(/\d+/g);
                 if (numbers) {
                     document.getElementById('studentRate').value = numbers[0];
                 }
-                
                 const nameCleaned = text.replace(/\d+/g, '').replace(/(рублей|гривен|ставка|руб|грн|гривень|rate)/gi, '').trim();
                 if (nameCleaned) {
                     document.getElementById('studentName').value = nameCleaned.charAt(0).toUpperCase() + nameCleaned.slice(1);
@@ -851,7 +902,6 @@
 
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript.toLowerCase();
-                
                 const matchedStudent = students.find(s => text.includes(s.name.toLowerCase()));
                 if (matchedStudent) {
                     document.getElementById('lessonStudentSelect').value = matchedStudent.id;
@@ -1212,12 +1262,14 @@
                     }
                     const lItem = cfgData.find(c => c.key === `lang_${userId}`);
                     if (lItem) {
-                        currentLang = lItem.value || 'ru';
-                        document.getElementById('langSelect').value = currentLang;
+                        selectLang(lItem.value || 'ru');
+                    } else {
+                        selectLang('ru');
                     }
+                } else {
+                    selectLang('ru');
                 }
 
-                applyLocalization();
                 updateAppTitle();
                 render();
             } catch (err) {
