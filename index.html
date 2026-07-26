@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna's English School</title>
+    <title>English School App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -56,7 +56,7 @@
         }
 
         .app-title {
-            font-size: 19px;
+            font-size: 18px;
             font-weight: 800;
             color: var(--text-main);
             letter-spacing: -0.4px;
@@ -105,10 +105,10 @@
             color: #e11d48;
         }
 
-        /* --- ВСПЛЫВАЮЩАЯ ПОХВАЛА --- */
+        /* --- ВСПЛЫВАЮЩИЕ УВЕДОМЛЕНИЯ --- */
         .praise-toast {
             position: fixed;
-            top: -100px;
+            top: -120px;
             left: 50%;
             transform: translateX(-50%);
             background: #ffffff;
@@ -130,26 +130,41 @@
             top: 20px;
         }
 
-        /* --- ZOOM INPUT --- */
-        .zoom-bar {
+        .praise-toast.growth-toast {
+            border-color: #10b981;
+            color: #047857;
+            background: #ecfdf5;
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.25);
+        }
+
+        /* --- ПАНЕЛЬ НАСТРОЕК --- */
+        .settings-bar {
             background: #ffffff;
             border: 1px solid var(--border);
-            padding: 10px 12px;
+            padding: 12px;
             border-radius: 14px;
             margin-bottom: 14px;
             display: none;
-            gap: 8px;
-            align-items: center;
+            flex-direction: column;
+            gap: 10px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        .zoom-bar.active {
+        .settings-bar.active {
             display: flex;
         }
 
-        .zoom-bar input {
-            font-size: 13px;
-            padding: 8px 10px;
+        .settings-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .settings-field label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
         }
 
         /* --- СТАТИСТИКА --- */
@@ -166,6 +181,7 @@
             border-radius: var(--radius);
             border: 1px solid var(--border);
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            position: relative;
         }
 
         .stat-card h3 {
@@ -181,6 +197,111 @@
             font-size: 17px;
             font-weight: 800;
             color: var(--text-main);
+        }
+
+        .stat-card-clickable {
+            cursor: pointer;
+            transition: transform 0.1s ease, border-color 0.2s;
+        }
+
+        .stat-card-clickable:active {
+            transform: scale(0.97);
+        }
+
+        .stat-card-clickable:hover {
+            border-color: var(--primary);
+        }
+
+        .student-badge-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #eff6ff;
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #bfdbfe;
+            margin-top: 2px;
+        }
+
+        /* --- МОДАЛЬНОЕ ОКНО СТУДЕНТОВ --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 360px;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: modalUp 0.25s ease-out;
+        }
+
+        @keyframes modalUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .modal-close {
+            background: #f1f5f9;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--text-sub);
+        }
+
+        .modal-students-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .modal-student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            font-weight: 600;
         }
 
         /* --- СЕКЦИИ --- */
@@ -413,23 +534,30 @@
 </head>
 <body>
 
-    <!-- ВСПЛЫВАЮЩАЯ ПОХВАЛА -->
-    <div class="praise-toast" id="praiseToast">💖 Анна, вы лучший учитель!</div>
+    <!-- ВСПЛЫВАЮЩАЯ ПОХВАЛА И УВЕДОМЛЕНИЯ -->
+    <div class="praise-toast" id="praiseToast">💖 Вы отличный учитель!</div>
 
     <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
     <header class="app-header">
-        <div class="app-title">Anna's English School</div>
+        <div class="app-title" id="appTitle">English School</div>
         <div class="header-actions">
             <button class="btn-zoom-main" onclick="openZoomLink()">🎥 Zoom</button>
-            <button class="btn-icon-top" onclick="toggleZoomInput()" title="Настроить ссылку Zoom">⚙️</button>
+            <button class="btn-icon-top" onclick="toggleSettingsInput()" title="Настройки">⚙️</button>
             <button class="btn-icon-top btn-heart" onclick="showPraise()" title="Получить заряд бодрости">💖</button>
         </div>
     </header>
 
-    <!-- Настройка ссылки Zoom -->
-    <div class="zoom-bar" id="zoomBar">
-        <input type="text" id="zoomUrl" placeholder="Вставьте ссылку на Zoom...">
-        <button class="btn-primary" style="padding: 8px 12px; font-size:12px;" onclick="saveZoomUrl()">Сохранить</button>
+    <!-- Настройки приложения -->
+    <div class="settings-bar" id="settingsBar">
+        <div class="settings-field">
+            <label>Имя преподавателя</label>
+            <input type="text" id="teacherNameInput" placeholder="Укажите ваше имя...">
+        </div>
+        <div class="settings-field">
+            <label>Ссылка на Zoom</label>
+            <input type="text" id="zoomUrl" placeholder="Вставьте ссылку на Zoom...">
+        </div>
+        <button class="btn-primary" style="padding: 10px;" onclick="saveSettings()">Сохранить настройки</button>
     </div>
 
     <!-- СТАТИСТИКА -->
@@ -442,9 +570,12 @@
             <h3>Уроки сегодня</h3>
             <div class="value" id="todayLessonsCount">0</div>
         </div>
-        <div class="stat-card">
-            <h3>Всего студентов</h3>
-            <div class="value" id="totalStudentsCount">0</div>
+        <div class="stat-card stat-card-clickable" onclick="openStudentsModal()" title="Нажмите, чтобы посмотреть всех студентов">
+            <h3>Студенты</h3>
+            <div class="value">
+                <span id="totalStudentsCount">0</span>
+                <span class="student-badge-btn">👥 Список</span>
+            </div>
         </div>
         <div class="stat-card">
             <h3>Заработано</h3>
@@ -488,6 +619,19 @@
     <div class="section-title" style="margin: 18px 2px 10px 2px;">Расписание занятий</div>
     <div class="week-grid" id="weekGrid"></div>
 
+    <!-- МОДАЛЬНОЕ ОКНО СО СПИСКОМ ВСЕХ СТУДЕНТОВ -->
+    <div class="modal-overlay" id="studentsModal" onclick="closeStudentsModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">Ваши ученики 🎓</div>
+                <button class="modal-close" onclick="closeStudentsModal()">✕</button>
+            </div>
+            <div class="modal-students-list" id="modalStudentsList">
+                <!-- Заполняется динамически -->
+            </div>
+        </div>
+    </div>
+
     <script>
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) {
@@ -498,43 +642,67 @@
         const daysOfWeek = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
         const months = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
-        const praises = [
-            "Шапка в двери! 🧢🚪",
-            "Не грусти, капуста! 🥬😉",
-            "Ну какова красота! Анна, вы сегодня просто машина по обучению 🚀",
-            "London is the capital of... короче, ты и сама всё лучше всех знаешь 😉",
-            "Ученики думают, что вы преподаёте английский, а вы преподаёте стиль 😎",
-            "Пауза! Срочно выпей чаю, а то этот Present Perfect сам себя не объяснит ☕",
-            "Ещё один урок — и можно требовать британское гражданство 🇬🇧",
-            "Анна, осторожно! Уровень крутизны этого урока превышает все нормы ⚡",
-            "Если бы за терпение на уроках давали премии, ты бы уже купила Майбах 💸",
-            "Английская королева гордилась бы тобой (если бы была жива) 👑",
-            "Минус один урок, плюс 100 к карме и к балансу на карте 💅"
-        ];
-
+        let teacherName = ""; // Изначально пустое
         let students = [];
         let lessons = [];
         let zoomUrl = '';
         let toastTimeout = null;
 
-        // Устанавливаем сегодняшнюю дату по умолчанию
         document.getElementById('lessonDate').valueAsDate = new Date();
 
-        function showPraise() {
+        function getPraises() {
+            const nameStr = teacherName ? teacherName : "Учитель";
+            return [
+                "Шапка в двери! 🧢🚪",
+                "Не грусти, капуста! 🥬😉",
+                `Ну какова красота! ${nameStr}, вы сегодня просто машина по обучению 🚀`,
+                "London is the capital of... короче, ты и сама всё лучше всех знаешь 😉",
+                `Ученики думают, что вы преподаёте английский, а вы преподаёте стиль, ${nameStr} 😎`,
+                "Пауза! Срочно выпей чаю, а то этот Present Perfect сам себя не объяснит ☕",
+                "Ещё один урок — и можно требовать британское гражданство 🇬🇧",
+                `${nameStr}, осторожно! Уровень крутизны этого урока превышает все нормы ⚡`,
+                "Если бы за терпение на уроках давали премии, ты бы уже купила Майбах 💸",
+                "Английская королева гордилась бы тобой 👑",
+                "Минус один урок, плюс 100 к карме и к балансу на карте 💅"
+            ];
+        }
+
+        function getGrowthPhrases() {
+            const schoolTitle = teacherName ? `Школа ${teacherName}` : "Твоя школа";
+            const nameStr = teacherName ? teacherName : "Преподаватель";
+
+            return [
+                `🚀 Ещё один ученик в копилку! ${schoolTitle} уверенно расширяет границы!`,
+                "📈 Правильное направление! С каждым новым студентом растёт твой доход и мастерство!",
+                `✨ Новый студент — новая история успеха! ${nameStr}, ваша школа становится всё популярнее!`,
+                "👑 Плюс один! Ты не просто учишь людей — ты строишь свою собственную образовательную империю!",
+                `🎯 Отличная работа! ${nameStr}, динамика развития школы просто потрясающая!`
+            ];
+        }
+
+        function showPraise(customText = null, isGrowth = false) {
             const toast = document.getElementById('praiseToast');
-            const randomPraise = praises[Math.floor(Math.random() * praises.length)];
+            const praisesList = getPraises();
+            const randomPraise = customText || praisesList[Math.floor(Math.random() * praisesList.length)];
             
             toast.innerText = randomPraise;
+            
+            if (isGrowth) {
+                toast.classList.add('growth-toast');
+            } else {
+                toast.classList.remove('growth-toast');
+            }
+
             toast.classList.add('show');
 
             if (toastTimeout) clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3500);
+            }, 4000);
         }
 
-        function toggleZoomInput() {
-            const bar = document.getElementById('zoomBar');
+        function toggleSettingsInput() {
+            const bar = document.getElementById('settingsBar');
             bar.classList.toggle('active');
         }
 
@@ -542,9 +710,33 @@
             if (zoomUrl) {
                 window.open(zoomUrl, '_blank');
             } else {
-                alert('Ссылка на Zoom ещё не добавлена. Нажмите на ⚙️ чтобы вставить ссылку!');
-                toggleZoomInput();
+                alert('Ссылка на Zoom ещё не добавлена. Нажмите на ⚙️ чтобы настроить!');
+                toggleSettingsInput();
             }
+        }
+
+        function openStudentsModal() {
+            const listEl = document.getElementById('modalStudentsList');
+            listEl.innerHTML = '';
+
+            if (students.length === 0) {
+                listEl.innerHTML = '<p style="color:#94a3b8; font-size:13px; text-align:center; padding: 10px;">Студентов пока нет</p>';
+            } else {
+                students.forEach(s => {
+                    listEl.innerHTML += `
+                        <div class="modal-student-item">
+                            <span>👤 ${s.name}</span>
+                            <span style="color:var(--primary);">${s.rate} ₴/урок</span>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('studentsModal').classList.add('active');
+        }
+
+        function closeStudentsModal(e) {
+            document.getElementById('studentsModal').classList.remove('active');
         }
 
         // --- ЗАГРУЗКА ИЗ SUPABASE ---
@@ -556,23 +748,49 @@
                 const { data: lsData } = await supabase.from('lessons').select('*');
                 if (lsData) lessons = lsData;
 
-                const { data: cfgData } = await supabase.from('config').select('*').eq('key', 'zoom_url').single();
+                // Загрузка настроек
+                const { data: cfgData } = await supabase.from('config').select('*');
                 if (cfgData) {
-                    zoomUrl = cfgData.value;
-                    document.getElementById('zoomUrl').value = zoomUrl;
+                    const zItem = cfgData.find(c => c.key === 'zoom_url');
+                    if (zItem) {
+                        zoomUrl = zItem.value;
+                        document.getElementById('zoomUrl').value = zoomUrl;
+                    }
+
+                    const tItem = cfgData.find(c => c.key === 'teacher_name');
+                    if (tItem && tItem.value) {
+                        teacherName = tItem.value;
+                        document.getElementById('teacherNameInput').value = teacherName;
+                    }
                 }
 
+                updateAppTitle();
                 render();
             } catch (err) {
                 console.error("Ошибка загрузки данных из Supabase:", err);
             }
         }
 
-        async function saveZoomUrl() {
+        function updateAppTitle() {
+            const titleEl = document.getElementById('appTitle');
+            if (teacherName && teacherName.trim() !== '') {
+                titleEl.innerText = `${teacherName}'s English School`;
+            } else {
+                titleEl.innerText = `English School`;
+            }
+        }
+
+        async function saveSettings() {
             zoomUrl = document.getElementById('zoomUrl').value.trim();
+            const newTeacherName = document.getElementById('teacherNameInput').value.trim();
+
+            teacherName = newTeacherName;
+            await supabase.from('config').upsert({ key: 'teacher_name', value: teacherName });
             await supabase.from('config').upsert({ key: 'zoom_url', value: zoomUrl });
-            document.getElementById('zoomBar').classList.remove('active');
-            alert('Ссылка Zoom успешно сохранена!');
+
+            updateAppTitle();
+            document.getElementById('settingsBar').classList.remove('active');
+            alert('Настройки успешно сохранены!');
             render();
         }
 
@@ -591,6 +809,10 @@
                 document.getElementById('studentName').value = '';
                 document.getElementById('studentRate').value = '';
                 render();
+
+                const growthPhrases = getGrowthPhrases();
+                const randomGrowth = growthPhrases[Math.floor(Math.random() * growthPhrases.length)];
+                showPraise(randomGrowth, true);
             }
         }
 
@@ -613,7 +835,7 @@
             const student = students.find(s => s.id === studentId);
 
             const newLesson = {
-                day: dateVal, // сохраняем и дату
+                day: dateVal,
                 lesson_date: dateVal,
                 time: timeVal,
                 student_name: student.name,
@@ -814,7 +1036,6 @@
 
             const todayStr = new Date().toISOString().split('T')[0];
 
-            // Группируем уроки по датам
             const groupedLessons = {};
             lessons.forEach(l => {
                 const dateKey = l.lesson_date || l.day || todayStr;
@@ -827,7 +1048,6 @@
                 }
             });
 
-            // Сортируем даты по возрастанию
             const sortedDates = Object.keys(groupedLessons).sort();
 
             if (sortedDates.length === 0) {
