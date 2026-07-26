@@ -14,6 +14,7 @@
             --success: #10b981;
             --danger: #ef4444;
             --zoom: #38bdf8;
+            --gold: #f59e0b;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
             --border: #334155;
@@ -64,6 +65,20 @@
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
+        }
+
+        .btn-premium-badge {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--gold);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            padding: 7px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .btn-icon-top {
@@ -181,11 +196,33 @@
             margin-bottom: 16px;
         }
 
+        .section-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
         .section-title {
             font-size: 15px;
             font-weight: 700;
-            margin-bottom: 12px;
             color: var(--text-main);
+        }
+
+        .limit-info-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 8px;
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--gold);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .limit-info-tag.pro {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border-color: rgba(16, 185, 129, 0.3);
         }
 
         .form-grid {
@@ -388,11 +425,12 @@
         .btn-success-sm { background: var(--success); color: white; }
         .btn-danger-sm { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
+        /* --- МОДАЛЬНЫЕ ОКНА --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
             z-index: 10000;
             display: none;
             justify-content: center;
@@ -409,6 +447,7 @@
             border-radius: 20px;
             padding: 20px;
             border: 1px solid var(--border);
+            text-align: center;
         }
 
         .modal-header {
@@ -418,7 +457,7 @@
             margin-bottom: 14px;
         }
 
-        .modal-title { font-size: 16px; font-weight: 800; }
+        .modal-title { font-size: 16px; font-weight: 800; text-align: left; }
 
         .modal-close {
             background: var(--border);
@@ -433,6 +472,7 @@
             gap: 8px;
             max-height: 250px;
             overflow-y: auto;
+            text-align: left;
         }
 
         .modal-student-item {
@@ -446,6 +486,57 @@
             font-size: 13px;
             font-weight: 600;
         }
+
+        /* --- PAYWALL MODAL --- */
+        .paywall-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .paywall-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .paywall-desc {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .paywall-features {
+            text-align: left;
+            background: var(--bg);
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            margin-bottom: 18px;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .paywall-price {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-main);
+            margin-bottom: 14px;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            font-weight: 800;
+            padding: 14px;
+            border-radius: 14px;
+            width: 100%;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -455,6 +546,7 @@
     <header class="app-header">
         <div class="app-title" id="appTitle">English School</div>
         <div class="header-actions">
+            <button class="btn-premium-badge" onclick="openPaywallModal()">⭐ <span id="headerPlanText">Free</span></button>
             <button class="btn-zoom-main" onclick="openZoomLink()">🎥 Zoom</button>
             <button class="btn-icon-top" onclick="toggleSettingsInput()">⚙️</button>
             <button class="btn-icon-top btn-heart" onclick="showPraise()">💖</button>
@@ -496,7 +588,10 @@
     </div>
 
     <div class="section-box">
-        <div class="section-title">Студенты</div>
+        <div class="section-header-flex">
+            <div class="section-title">Студенты</div>
+            <div class="limit-info-tag" id="limitTag">Лимит: 0 / 3</div>
+        </div>
         <div class="form-grid">
             <input type="text" id="studentName" placeholder="Имя">
             <input type="number" id="studentRate" placeholder="Ставка (₴)">
@@ -508,7 +603,7 @@
     </div>
 
     <div class="section-box">
-        <div class="section-title">Запланировать урок</div>
+        <div class="section-title" style="margin-bottom: 12px;">Запланировать урок</div>
         <div class="form-grid">
             <input type="date" id="lessonDate">
             <input type="time" id="lessonTime" value="15:00">
@@ -526,6 +621,7 @@
     <div class="section-title" style="margin: 18px 2px 10px 2px;">Расписание занятий</div>
     <div class="week-container" id="weekGrid"></div>
 
+    <!-- МОДАЛКА СПИСКА УЧЕНИКОВ -->
     <div class="modal-overlay" id="studentsModal" onclick="closeStudentsModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -533,6 +629,28 @@
                 <button class="modal-close" onclick="closeStudentsModal()">✕</button>
             </div>
             <div class="modal-students-list" id="modalStudentsList"></div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ПОДПИСКИ (PAYWALL) -->
+    <div class="modal-overlay" id="paywallModal" onclick="closePaywallModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div style="text-align: right;">
+                <button class="modal-close" onclick="closePaywallModal()">✕</button>
+            </div>
+            <div class="paywall-icon">🚀</div>
+            <div class="paywall-title">English School PRO</div>
+            <div class="paywall-desc">Вы достигли лимита бесплатной версии (3 ученика). Перейдите на PRO, чтобы вести бизнес без ограничений!</div>
+            
+            <div class="paywall-features">
+                <div>✅ <b>Неограниченное</b> количество учеников</div>
+                <div>✅ Авто-уведомления уроков в Telegram</div>
+                <div>✅ Полная статистика доходов и занятий</div>
+                <div>✅ Приоритетная поддержка</div>
+            </div>
+
+            <div class="paywall-price">4.99 $ <span style="font-size: 13px; color: var(--text-sub); font-weight: normal;">/ месяц</span></div>
+            <button class="btn-gold" onclick="subscribePro()">Оформить PRO подписку</button>
         </div>
     </div>
 
@@ -565,11 +683,14 @@
         const months = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
         let teacherName = tgUser ? (tgUser.first_name || '') : '';
+        let isPremium = false;
         let students = [];
         let lessons = [];
         let zoomUrl = '';
         let toastTimeout = null;
         let isExpanded = false;
+
+        const FREE_STUDENT_LIMIT = 3;
 
         document.getElementById('lessonDate').valueAsDate = new Date();
 
@@ -615,6 +736,18 @@
             document.getElementById('studentsModal').classList.remove('active');
         }
 
+        function openPaywallModal() {
+            document.getElementById('paywallModal').classList.add('active');
+        }
+
+        function closePaywallModal() {
+            document.getElementById('paywallModal').classList.remove('active');
+        }
+
+        function subscribePro() {
+            alert('Здесь будет переход к оплате (например через Telegram Stars, LiqPay или Stripe).');
+        }
+
         function updateAppTitle() {
             document.getElementById('appTitle').innerText = teacherName ? `${teacherName}'s English School` : `English School`;
         }
@@ -630,11 +763,17 @@
         async function registerUserInDb() {
             if (!db || !tgUser) return;
             try {
-                await db.from('users').upsert({
-                    chat_id: String(tgUser.id),
-                    first_name: tgUser.first_name || '',
-                    username: tgUser.username || ''
-                }, { onConflict: 'chat_id' });
+                const { data } = await db.from('users').select('is_premium').eq('chat_id', userId).single();
+                if (data) {
+                    isPremium = !!data.is_premium;
+                } else {
+                    await db.from('users').insert({
+                        chat_id: String(tgUser.id),
+                        first_name: tgUser.first_name || '',
+                        username: tgUser.username || '',
+                        is_premium: false
+                    });
+                }
             } catch(e) {}
         }
 
@@ -655,6 +794,12 @@
         }
 
         async function addStudent() {
+            // Проверка лимита бесплатного тарифа
+            if (!isPremium && students.length >= FREE_STUDENT_LIMIT) {
+                openPaywallModal();
+                return;
+            }
+
             const name = document.getElementById('studentName').value.trim();
             const rate = parseFloat(document.getElementById('studentRate').value);
             if (!name || isNaN(rate)) return alert('Заполните имя и ставку!');
@@ -743,6 +888,20 @@
         }
 
         function render() {
+            // Обновление плашки лимита и плашки в шапке
+            const limitTag = document.getElementById('limitTag');
+            const headerPlanText = document.getElementById('headerPlanText');
+
+            if (isPremium) {
+                limitTag.innerText = 'PRO: Безлимит';
+                limitTag.className = 'limit-info-tag pro';
+                headerPlanText.innerText = 'PRO';
+            } else {
+                limitTag.innerText = `Бесплатно: ${students.length} / ${FREE_STUDENT_LIMIT}`;
+                limitTag.className = 'limit-info-tag';
+                headerPlanText.innerText = 'Free';
+            }
+
             const stListEl = document.getElementById('studentsList');
             if (stListEl) {
                 stListEl.innerHTML = students.map(s => `
