@@ -2,177 +2,222 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Управление уроками</title>
-
-    <!-- Подключаем Telegram WebApp SDK -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Anna's English School</title>
+    
+    <!-- Telegram WebApp & Supabase SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Подключаем Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg-color: #f4f4f7;
-            --card-bg: #ffffff;
-            --text-color: #1c1c1e;
-            --hint-color: #8e8e93;
-            --primary-color: #007aff;
-            --accent-color: #34c759;
-            --danger-color: #ff3b30;
-            --border-radius: 12px;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --success: #10b981;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --danger: #ef4444;
+            --radius: 16px;
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
+            background-color: var(--bg);
+            color: var(--text-main);
             padding: 16px;
             padding-bottom: 90px;
-            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
 
-        h1, h2, h3 { margin: 0 0 12px 0; font-weight: 600; }
-        .subtitle { font-size: 14px; color: var(--hint-color); margin-bottom: 20px; }
-
-        .tabs {
+        .header {
             display: flex;
-            background: #e3e3e8;
-            padding: 3px;
-            border-radius: 10px;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
         }
 
-        .tab {
+        .title { font-size: 22px; font-weight: 700; }
+        .subtitle { font-size: 13px; color: var(--text-muted); }
+
+        .vip-badge {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        /* Навигация */
+        .nav-tabs {
+            display: flex;
+            background: #1e293b;
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .nav-btn {
             flex: 1;
             padding: 10px 0;
             text-align: center;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
+            color: var(--text-muted);
+            border: none;
+            background: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background 0.2s, color 0.2s;
+            transition: all 0.2s;
         }
 
-        .tab.active {
-            background: var(--card-bg);
-            color: var(--text-color);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        .nav-btn.active {
+            background: var(--accent);
+            color: #fff;
         }
 
-        .content-section { display: none; }
-        .content-section.active { display: block; }
+        .section { display: none; }
+        .section.active { display: block; }
 
+        /* Карточки */
         .card {
             background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 16px;
+            border-radius: var(--radius);
+            padding: 18px;
             margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
         }
 
-        .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; font-size: 12px; color: var(--hint-color); margin-bottom: 4px; }
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d1d1d6;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
-            background: #fff;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 12px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
+        .card-title {
             font-size: 16px;
             font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus, select:focus { border-color: var(--accent); }
+
+        .btn-main {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-main:active { background: var(--accent-hover); }
+
+        /* Уроки и Сетка */
+        .day-header {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 16px 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .lesson-card {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lesson-time { font-size: 15px; font-weight: 700; color: #fff; }
+        .lesson-student { font-size: 14px; color: var(--text-muted); }
+        .lesson-actions { display: flex; gap: 8px; align-items: center; }
+
+        .zoom-btn {
+            background: #2563eb;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-chip {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
             cursor: pointer;
         }
 
-        .lesson-item {
+        .status-chip.done { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .status-chip.pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+
+        .student-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 12px 0;
-            border-bottom: 1px solid #e5e5ea;
+            border-bottom: 1px solid var(--border);
         }
 
-        .lesson-item:last-child { border-bottom: none; }
-        .lesson-info { display: flex; flex-direction: column; }
-        .lesson-time { font-weight: 600; font-size: 16px; }
-        .lesson-student { font-size: 14px; color: var(--hint-color); }
-        .lesson-rate { font-size: 14px; color: var(--accent-color); font-weight: 500; }
+        .student-row:last-child { border-bottom: none; }
+        .delete-btn { background: none; border: none; color: var(--danger); font-size: 18px; cursor: pointer; }
 
-        .status-btn {
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: none;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .status-btn.pending { background: #ffe600; color: #000; }
-        .status-btn.done { background: var(--accent-color); color: #fff; }
-
-        .student-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #e5e5ea;
-        }
-        .student-item:last-child { border-bottom: none; }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: var(--danger-color);
-            font-size: 18px;
-            cursor: pointer;
-            padding: 0 8px;
-        }
-
-        .badge-vip {
-            display: inline-block;
-            background: #ffcc00;
-            color: #000;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 2px 8px;
-            border-radius: 12px;
-            margin-left: 8px;
-        }
-
-        .limit-counter {
-            font-size: 12px;
-            color: var(--hint-color);
-            margin-bottom: 8px;
-        }
+        .stat-value { font-size: 32px; font-weight: 700; color: var(--success); margin-top: 8px; }
+        .limit-text { font-size: 12px; color: var(--text-muted); }
     </style>
 </head>
 <body>
 
-    <h1 id="user-greeting">Расписание уроков</h1>
-    <p class="subtitle">Управляйте занятиями и доходами</p>
-
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab('schedule')">Расписание</div>
-        <div class="tab" onclick="switchTab('students')">Ученики</div>
-        <div class="tab" onclick="switchTab('stats')">Статистика</div>
+    <div class="header">
+        <div>
+            <div class="title" id="user-greeting">Anna's English School</div>
+            <div class="subtitle">Планирование & Расписание</div>
+        </div>
+        <div id="vip-status"></div>
     </div>
 
-    <!-- Раздел Расписание -->
-    <div id="schedule" class="content-section active">
+    <div class="nav-tabs">
+        <button class="nav-btn active" onclick="setTab('schedule')">Расписание</button>
+        <button class="nav-btn" onclick="setTab('students')">Ученики</button>
+        <button class="nav-btn" onclick="setTab('stats')">Доходы</button>
+    </div>
+
+    <!-- РАСПИСАНИЕ -->
+    <div id="schedule" class="section active">
         <div class="card">
-            <h3>Добавить урок</h3>
-            <div class="input-group">
+            <div class="card-title">Добавить урок</div>
+            <div class="form-group">
                 <label>День недели</label>
                 <select id="lesson-day">
                     <option value="Понедельник">Понедельник</option>
@@ -184,53 +229,57 @@
                     <option value="Воскресенье">Воскресенье</option>
                 </select>
             </div>
-            <div class="input-group">
+            <div class="form-group">
                 <label>Время</label>
-                <input type="time" id="lesson-time" value="10:00">
+                <input type="time" id="lesson-time" value="12:00">
             </div>
-            <div class="input-group">
+            <div class="form-group">
                 <label>Ученик</label>
-                <select id="lesson-student-select">
-                    <!-- Заполняется динамически -->
-                </select>
+                <select id="lesson-student-select"></select>
             </div>
-            <button class="btn" onclick="addLesson()">Сохранить урок</button>
+            <div class="form-group">
+                <label>Ссылка на Zoom (необязательно)</label>
+                <input type="url" id="lesson-zoom" placeholder="https://zoom.us/j/...">
+            </div>
+            <button class="btn-main" onclick="addLesson()">Запланировать урок</button>
         </div>
 
         <div class="card">
-            <h3>Уроки на неделю</h3>
-            <div id="lessons-list"></div>
+            <div class="card-title">Уроки на неделю</div>
+            <div id="lessons-container"></div>
         </div>
     </div>
 
-    <!-- Раздел Ученики -->
-    <div id="students" class="content-section">
+    <!-- УЧЕНИКИ -->
+    <div id="students" class="section">
         <div class="card">
-            <h3>Новый ученик</h3>
-            <div id="student-limit-info" class="limit-counter"></div>
-            <div class="input-group">
-                <label>Имя ученика</label>
-                <input type="text" id="student-name" placeholder="Например: Иван">
+            <div class="card-title">
+                Новый ученик
+                <span id="limit-counter" class="limit-text"></span>
             </div>
-            <div class="input-group">
-                <label>Ставка за урок ($ или ₴)</label>
-                <input type="number" id="student-rate" placeholder="20">
+            <div class="form-group">
+                <label>Имя Ученика</label>
+                <input type="text" id="student-name" placeholder="Например: Максим">
             </div>
-            <button class="btn" onclick="addStudent()">Добавить ученика</button>
+            <div class="form-group">
+                <label>Ставка за урок (₴)</label>
+                <input type="number" id="student-rate" placeholder="400">
+            </div>
+            <button class="btn-main" onclick="addStudent()">Сохранить ученика</button>
         </div>
 
         <div class="card">
-            <h3>Список учеников</h3>
-            <div id="students-list"></div>
+            <div class="card-title">Мои Ученики</div>
+            <div id="students-container"></div>
         </div>
     </div>
 
-    <!-- Раздел Статистика -->
-    <div id="stats" class="content-section">
+    <!-- ДОХОДЫ -->
+    <div id="stats" class="section">
         <div class="card">
-            <h3>Заработано за неделю</h3>
-            <h2 id="total-earned" style="color: var(--accent-color); font-size: 32px;">0 ₴</h2>
-            <p style="font-size: 13px; color: var(--hint-color);">Считается только за проведённые уроки</p>
+            <div class="card-title">Заработано за неделю</div>
+            <div class="stat-value" id="total-earned">0 ₴</div>
+            <div class="subtitle" style="margin-top: 8px;">Считаются только выполненные уроки</div>
         </div>
     </div>
 
@@ -239,23 +288,25 @@
         const SUPABASE_KEY = 'sb_publishable__yFLFUaOvySO0Kfq3kynaw_AltSdqzX';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 👑 СПИСОК VIP ПОЛЬЗОВАТЕЛЕЙ БЕЗ ОГРАНИЧЕНИЙ (Добавь сюда Telegram ID Анны)
-        // Если ID Анны, например, 123456789, впиши: ['123456789', 'test_user_123']
-        const VIP_USER_IDS = ['test_user_123']; 
-        const MAX_FREE_STUDENTS = 5;
-
+        // Telegram WebApp Init
         const tg = window.Telegram?.WebApp;
         if (tg) tg.expand();
 
         const user = tg?.initDataUnsafe?.user || { id: 'test_user_123', first_name: 'Анна' };
-        const isVipUser = VIP_USER_IDS.includes(String(user.id));
+        
+        // Список VIP без ограничений (ID Анны запишем сюда)
+        const VIP_USER_IDS = ['test_user_123']; 
+        const isVip = VIP_USER_IDS.includes(String(user.id));
+        const MAX_FREE = 5;
 
         let students = [];
         let lessons = [];
 
-        // Отображение имени и статуса
-        const greetingEl = document.getElementById('user-greeting');
-        greetingEl.innerHTML = `Привет, ${user.first_name}! 👋 ${isVipUser ? '<span class="badge-vip">PRO VIP</span>' : ''}`;
+        // Инициализация
+        document.getElementById('user-greeting').innerText = `Привет, ${user.first_name}! 👋`;
+        if (isVip) {
+            document.getElementById('vip-status').innerHTML = '<span class="vip-badge">PRO VIP</span>';
+        }
 
         async function init() {
             await ensureProfile();
@@ -265,11 +316,7 @@
         async function ensureProfile() {
             const { data } = await supabase.from('profiles').select('id').eq('id', String(user.id)).single();
             if (!data) {
-                await supabase.from('profiles').insert([{
-                    id: String(user.id),
-                    first_name: user.first_name || '',
-                    username: user.username || ''
-                }]);
+                await supabase.from('profiles').insert([{ id: String(user.id), first_name: user.first_name || '', username: user.username || '' }]);
             }
         }
 
@@ -285,35 +332,25 @@
             calculateStats();
         }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-
+        function setTab(tab) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            
             event.target.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
+            document.getElementById(tab).classList.add('active');
         }
 
         async function addStudent() {
             const name = document.getElementById('student-name').value.trim();
             const rate = parseFloat(document.getElementById('student-rate').value) || 0;
 
-            if (!name) return alert('Введите имя ученика');
+            if (!name) return alert('Укажите имя ученика');
 
-            // ПРОВЕРКА ЛИМИТА: если пользователь НЕ в списке VIP и у него уже >= 5 учеников
-            if (!isVipUser && students.length >= MAX_FREE_STUDENTS) {
-                alert(
-                    `🚀 Вы достигли лимита бесплатного тарифа (${MAX_FREE_STUDENTS} учеников)!\n\n` +
-                    `Для снятия ограничений и подключения всех бизнес-фич свяжитесь с разработчиком для оформления PRO-подписки.`
-                );
-                return;
+            if (!isVip && students.length >= MAX_FREE) {
+                return alert(`🚀 Вы достигли лимита бесплатного тарифа (${MAX_FREE} учеников).\n\nОформите PRO-подписку для безлимитного доступа!`);
             }
 
-            const { data, error } = await supabase.from('students').insert([{
-                user_id: String(user.id),
-                name,
-                rate
-            }]).select();
-
+            const { data, error } = await supabase.from('students').insert([{ user_id: String(user.id), name, rate }]).select();
             if (!error && data) {
                 students.push(data[0]);
                 document.getElementById('student-name').value = '';
@@ -329,40 +366,32 @@
         }
 
         function renderStudents() {
-            const list = document.getElementById('students-list');
+            const container = document.getElementById('students-container');
             const select = document.getElementById('lesson-student-select');
-            const limitInfo = document.getElementById('student-limit-info');
-            
-            list.innerHTML = '';
+            const counter = document.getElementById('limit-counter');
+
+            container.innerHTML = '';
             select.innerHTML = '';
 
-            // Обновляем информацию о лимите
-            if (isVipUser) {
-                limitInfo.innerText = 'У вас подключен VIP-доступ (безлимит)';
-                limitInfo.style.color = '#34c759';
-            } else {
-                limitInfo.innerText = `Использовано мест: ${students.length} из ${MAX_FREE_STUDENTS} (Бесплатный тариф)`;
-                limitInfo.style.color = students.length >= MAX_FREE_STUDENTS ? '#ff3b30' : '#8e8e93';
-            }
+            counter.innerText = isVip ? 'VIP Безлимит' : `${students.length}/${MAX_FREE} мест`;
 
             if (students.length === 0) {
-                list.innerHTML = '<p style="color: var(--hint-color);">Учеников пока нет</p>';
+                container.innerHTML = '<div class="subtitle">Учеников пока нет</div>';
                 select.innerHTML = '<option value="">Сначала добавьте ученика</option>';
                 return;
             }
 
-            students.forEach(st => {
-                list.innerHTML += `
-                    <div class="student-item">
+            students.forEach(s => {
+                container.innerHTML += `
+                    <div class="student-row">
                         <div>
-                            <strong>${st.name}</strong>
-                            <div style="font-size: 12px; color: var(--hint-color);">${st.rate} ₴ / урок</div>
+                            <strong style="color: #fff;">${s.name}</strong>
+                            <div class="subtitle">${s.rate} ₴ / урок</div>
                         </div>
-                        <button class="delete-btn" onclick="deleteStudent('${st.id}')">✕</button>
+                        <button class="delete-btn" onclick="deleteStudent('${s.id}')">✕</button>
                     </div>
                 `;
-
-                select.innerHTML += `<option value="${st.name}">${st.name} (${st.rate} ₴)</option>`;
+                select.innerHTML += `<option value="${s.name}">${s.name} (${s.rate} ₴)</option>`;
             });
         }
 
@@ -370,11 +399,12 @@
             const day = document.getElementById('lesson-day').value;
             const time = document.getElementById('lesson-time').value;
             const studentName = document.getElementById('lesson-student-select').value;
+            const zoom = document.getElementById('lesson-zoom').value.trim();
 
             if (!studentName) return alert('Выберите ученика');
 
-            const studentObj = students.find(s => s.name === studentName);
-            const rate = studentObj ? studentObj.rate : 0;
+            const st = students.find(s => s.name === studentName);
+            const rate = st ? st.rate : 0;
 
             const { data, error } = await supabase.from('lessons').insert([{
                 user_id: String(user.id),
@@ -387,55 +417,61 @@
 
             if (!error && data) {
                 lessons.push(data[0]);
+                document.getElementById('lesson-zoom').value = '';
                 renderLessons();
                 calculateStats();
             }
         }
 
-        async function toggleLessonStatus(id) {
-            const lesson = lessons.find(l => l.id === id);
-            if (!lesson) return;
+        async function toggleLesson(id) {
+            const l = lessons.find(x => x.id === id);
+            if (!l) return;
 
-            const newStatus = !lesson.completed;
+            const newStatus = !l.completed;
             const { error } = await supabase.from('lessons').update({ completed: newStatus }).eq('id', id);
-
             if (!error) {
-                lesson.completed = newStatus;
+                l.completed = newStatus;
                 renderLessons();
                 calculateStats();
             }
         }
 
         function renderLessons() {
-            const list = document.getElementById('lessons-list');
-            list.innerHTML = '';
+            const container = document.getElementById('lessons-container');
+            container.innerHTML = '';
 
             if (lessons.length === 0) {
-                list.innerHTML = '<p style="color: var(--hint-color);">Уроков пока нет</p>';
+                container.innerHTML = '<div class="subtitle">Уроков на эту неделю пока нет</div>';
                 return;
             }
 
-            lessons.forEach(l => {
-                list.innerHTML += `
-                    <div class="lesson-item">
-                        <div class="lesson-info">
-                            <span class="lesson-time">${l.day}, ${l.time}</span>
-                            <span class="lesson-student">${l.student_name}</span>
-                            <span class="lesson-rate">${l.rate} ₴</span>
-                        </div>
-                        <button class="status-btn ${l.completed ? 'done' : 'pending'}" onclick="toggleLessonStatus('${l.id}')">
-                            ${l.completed ? 'Проведён' : 'Запланирован'}
-                        </button>
-                    </div>
-                `;
+            const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
+
+            days.forEach(d => {
+                const dayLessons = lessons.filter(l => l.day === d);
+                if (dayLessons.length > 0) {
+                    container.innerHTML += `<div class="day-header">${d}</div>`;
+                    dayLessons.forEach(l => {
+                        container.innerHTML += `
+                            <div class="lesson-card">
+                                <div>
+                                    <div class="lesson-time">${l.time}</div>
+                                    <div class="lesson-student">${l.student_name} (${l.rate} ₴)</div>
+                                </div>
+                                <div class="lesson-actions">
+                                    <button class="status-chip ${l.completed ? 'done' : 'pending'}" onclick="toggleLesson('${l.id}')">
+                                        ${l.completed ? 'Проведён' : 'Ожидает'}
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
             });
         }
 
         function calculateStats() {
-            const total = lessons
-                .filter(l => l.completed)
-                .reduce((sum, l) => sum + (Number(l.rate) || 0), 0);
-
+            const total = lessons.filter(l => l.completed).reduce((sum, l) => sum + (Number(l.rate) || 0), 0);
             document.getElementById('total-earned').innerText = `${total} ₴`;
         }
 
