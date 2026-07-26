@@ -12,8 +12,8 @@
         // =========================================================
         const GROQ_API_KEY = "gsk_eSdUfc3wqNfiDXqbGs2jWGdyb3" + "FYfzEaL2rTWZUHK890HX92ICXE"; 
 
-        const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_URL.supabase.co"; 
-        const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY"; 
+        const SUPABASE_URL = "https://myxospyofguyjskpbfnt.supabase.co"; 
+        const SUPABASE_KEY = "sb_publishable__yFLFUaOvySO0Kfq3kynaw_AltSdqzX"; 
 
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     </script>
@@ -704,8 +704,8 @@
         async function processAudioWhisper(audioBlob, target) {
             const btn = (target === 'student') ? document.getElementById('voiceStudentBtn') : document.getElementById('voiceLessonBtn');
 
-            if (!GROQ_API_KEY || GROQ_API_KEY.includes("ВСТАВЬ_СЮДА")) {
-                alert("Ошибка: Укажите GROQ_API_KEY в коде!");
+            if (!GROQ_API_KEY) {
+                alert("Ошибка: Укажите GROQ_API_KEY!");
                 btn.innerText = '🎤';
                 return;
             }
