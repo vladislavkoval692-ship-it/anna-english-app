@@ -260,7 +260,6 @@
             border: 1px solid var(--border);
         }
 
-        /* Карточка "Сегодня" */
         .day-column.is-today {
             border: 2px solid var(--primary);
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
@@ -280,7 +279,6 @@
 
         .day-column.is-today .day-header { color: var(--primary); }
 
-        /* Кнопка-переключатель раскрытия */
         .expand-toggle-btn {
             background: rgba(59, 130, 246, 0.12);
             color: var(--primary);
@@ -298,21 +296,16 @@
             transition: all 0.2s ease;
         }
 
-        .expand-toggle-btn:active {
-            transform: scale(0.98);
-        }
+        .expand-toggle-btn:active { transform: scale(0.98); }
 
-        /* Выплывающий блок */
         .other-days-block {
-            display: none; /* По умолчанию скрыт */
+            display: none;
             flex-direction: column;
             gap: 10px;
             animation: fadeIn 0.3s ease-in-out;
         }
 
-        .other-days-block.show {
-            display: flex;
-        }
+        .other-days-block.show { display: flex; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-8px); }
@@ -395,7 +388,6 @@
         .btn-success-sm { background: var(--success); color: white; }
         .btn-danger-sm { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
-        /* МОДАЛЬНОЕ ОКНО */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -545,10 +537,17 @@
     </div>
 
     <script>
+        let tgUser = null;
+        let userId = 'default_user';
+
         try {
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.ready();
                 window.Telegram.WebApp.expand();
+                if (window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+                    tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+                    userId = String(tgUser.id);
+                }
             }
         } catch (e) {}
 
@@ -565,12 +564,12 @@
         const daysOfWeek = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
         const months = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
-        let teacherName = "";
+        let teacherName = tgUser ? (tgUser.first_name || '') : '';
         let students = [];
         let lessons = [];
         let zoomUrl = '';
         let toastTimeout = null;
-        let isExpanded = false; // Состояние открытости расписания
+        let isExpanded = false;
 
         document.getElementById('lessonDate').valueAsDate = new Date();
 
@@ -628,14 +627,25 @@
             if (btnText) btnText.innerText = isExpanded ? 'Свернуть расписание ▲' : 'Показать остальные дни ▼';
         }
 
+        async function registerUserInDb() {
+            if (!db || !tgUser) return;
+            try {
+                await db.from('users').upsert({
+                    chat_id: String(tgUser.id),
+                    first_name: tgUser.first_name || '',
+                    username: tgUser.username || ''
+                }, { onConflict: 'chat_id' });
+            } catch(e) {}
+        }
+
         async function saveSettings() {
             teacherName = document.getElementById('teacherNameInput').value.trim();
             zoomUrl = document.getElementById('zoomUrl').value.trim();
 
             if (db) {
                 try {
-                    await db.from('config').upsert({ key: 'teacher_name', value: teacherName });
-                    await db.from('config').upsert({ key: 'zoom_url', value: zoomUrl });
+                    await db.from('config').upsert({ key: `teacher_name_${userId}`, value: teacherName });
+                    await db.from('config').upsert({ key: `zoom_url_${userId}`, value: zoomUrl });
                 } catch(e) {}
             }
 
@@ -649,16 +659,18 @@
             const rate = parseFloat(document.getElementById('studentRate').value);
             if (!name || isNaN(rate)) return alert('Заполните имя и ставку!');
 
+            const newStudent = { name, rate, user_id: userId };
+
             if (db) {
                 try {
-                    const { data } = await db.from('students').insert([{ name, rate }]).select();
+                    const { data } = await db.from('students').insert([newStudent]).select();
                     if (data && data.length) students.push(data[0]);
-                    else students.push({ id: Date.now(), name, rate });
+                    else students.push({ ...newStudent, id: Date.now() });
                 } catch(e) {
-                    students.push({ id: Date.now(), name, rate });
+                    students.push({ ...newStudent, id: Date.now() });
                 }
             } else {
-                students.push({ id: Date.now(), name, rate });
+                students.push({ ...newStudent, id: Date.now() });
             }
             document.getElementById('studentName').value = '';
             document.getElementById('studentRate').value = '';
@@ -686,7 +698,8 @@
                 time: timeVal,
                 student_name: student ? student.name : 'Студент',
                 rate: student ? student.rate : 0,
-                completed: false
+                completed: false,
+                user_id: userId
             };
 
             if (db) {
@@ -730,7 +743,6 @@
         }
 
         function render() {
-            // Список студентов
             const stListEl = document.getElementById('studentsList');
             if (stListEl) {
                 stListEl.innerHTML = students.map(s => `
@@ -747,7 +759,6 @@
                     students.map(s => `<option value="${s.id}">${s.name} (${s.rate} ₴)</option>`).join('');
             }
 
-            // Даты недели
             const now = new Date();
             const todayStr = formatDateStr(now);
 
@@ -760,10 +771,7 @@
             for (let i = 0; i < 7; i++) {
                 const d = new Date(monday);
                 d.setDate(monday.getDate() + i);
-                weekDays.push({
-                    dateKey: formatDateStr(d),
-                    dateObj: d
-                });
+                weekDays.push({ dateKey: formatDateStr(d), dateObj: d });
             }
 
             let earnedIncomeVal = 0;
@@ -782,7 +790,6 @@
                 }
             });
 
-            // Находим сегодняшний день и остальные дни
             const todayObj = weekDays.find(d => d.dateKey === todayStr) || { dateKey: todayStr, dateObj: now };
             const otherDays = weekDays.filter(d => d.dateKey !== todayStr);
 
@@ -820,36 +827,27 @@
                             <span>${formattedDate} ${isToday ? '• СЕГОДНЯ' : ''}</span>
                             <span>${dayLessons.length} ур.</span>
                         </div>
-                        <div class="lessons-list">
-                            ${lessonsHtml}
-                        </div>
+                        <div class="lessons-list">${lessonsHtml}</div>
                     </div>
                 `;
             }
 
             const weekGridEl = document.getElementById('weekGrid');
             if (weekGridEl) {
-                // 1. Сначала карточка "СЕГОДНЯ"
                 let html = buildCardHtml(todayObj, true);
-
-                // 2. Синяя кнопка управления разворачиванием
                 html += `
                     <div class="expand-toggle-btn" onclick="toggleSchedule()">
                         <span id="toggleBtnText">${isExpanded ? 'Свернуть расписание ▲' : 'Показать остальные дни ▼'}</span>
                     </div>
                 `;
-
-                // 3. Выплывающий список остальных дней
                 html += `
                     <div class="other-days-block ${isExpanded ? 'show' : ''}" id="otherDaysBlock">
                         ${otherDays.map(d => buildCardHtml(d, false)).join('')}
                     </div>
                 `;
-
                 weekGridEl.innerHTML = html;
             }
 
-            // Статистика
             document.getElementById('completedLessonsCount').innerText = `${completedCount} / ${lessons.length}`;
             document.getElementById('todayLessonsCount').innerText = `${todayLessonsCountVal}`;
             document.getElementById('totalStudentsCount').innerText = `${students.length}`;
@@ -859,22 +857,24 @@
         async function loadSupabaseData() {
             if (!db) return;
             try {
-                const { data: stData } = await db.from('students').select('*');
+                await registerUserInDb();
+
+                const { data: stData } = await db.from('students').select('*').eq('user_id', userId);
                 if (stData) students = stData;
 
-                const { data: lsData } = await db.from('lessons').select('*');
+                const { data: lsData } = await db.from('lessons').select('*').eq('user_id', userId);
                 if (lsData) lessons = lsData;
 
                 const { data: cfgData } = await db.from('config').select('*');
                 if (cfgData) {
-                    const zItem = cfgData.find(c => c.key === 'zoom_url');
+                    const zItem = cfgData.find(c => c.key === `zoom_url_${userId}`);
                     if (zItem) {
                         zoomUrl = zItem.value || '';
                         document.getElementById('zoomUrl').value = zoomUrl;
                     }
-                    const tItem = cfgData.find(c => c.key === 'teacher_name');
+                    const tItem = cfgData.find(c => c.key === `teacher_name_${userId}`);
                     if (tItem) {
-                        teacherName = tItem.value || '';
+                        teacherName = tItem.value || teacherName;
                         document.getElementById('teacherNameInput').value = teacherName;
                     }
                 }
