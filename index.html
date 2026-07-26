@@ -15,20 +15,21 @@
         const SUPABASE_URL = "https://myxospyofguyjskpbfnt.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable__yFLFUaOvySO0Kfq3kynaw_AltSdqzX"; 
 
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Переименовали в db, чтобы JS не падал
+        const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
     </script>
     <style>
         :root {
-            --bg: #f1f5f9;
-            --card-bg: #ffffff;
-            --primary: #2563eb;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
             --success: #10b981;
             --danger: #ef4444;
-            --zoom: #0284c7;
-            --ai-color: #7c3aed;
-            --text-main: #0f172a;
-            --text-sub: #64748b;
-            --border: #e2e8f0;
+            --zoom: #38bdf8;
+            --ai-color: #a855f7;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border: #334155;
             --radius: 16px;
         }
 
@@ -69,9 +70,9 @@
         }
 
         .btn-zoom-main {
-            background: #e0f2fe;
+            background: rgba(56, 189, 248, 0.15);
             color: var(--zoom);
-            border: 1px solid #bae6fd;
+            border: 1px solid rgba(56, 189, 248, 0.3);
             padding: 7px 12px;
             border-radius: 12px;
             font-size: 13px;
@@ -91,7 +92,7 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
             transition: transform 0.1s ease;
         }
 
@@ -100,9 +101,9 @@
         }
 
         .btn-heart {
-            background: #fff1f2;
-            border: 1px solid #fecdd3;
-            color: #e11d48;
+            background: rgba(225, 29, 72, 0.15);
+            border: 1px solid rgba(225, 29, 72, 0.3);
+            color: #fb7185;
         }
 
         /* --- ВСПЛЫВАЮЩИЕ УВЕДОМЛЕНИЯ --- */
@@ -111,14 +112,14 @@
             top: -120px;
             left: 50%;
             transform: translateX(-50%);
-            background: #ffffff;
+            background: var(--card-bg);
             border: 2px solid #fecdd3;
-            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.2);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
             padding: 12px 18px;
             border-radius: 20px;
             font-size: 13px;
             font-weight: 700;
-            color: #e11d48;
+            color: #fb7185;
             z-index: 9999;
             transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-align: center;
@@ -132,14 +133,13 @@
 
         .praise-toast.growth-toast {
             border-color: #10b981;
-            color: #047857;
-            background: #ecfdf5;
-            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.25);
+            color: #34d399;
+            background: var(--card-bg);
         }
 
         /* --- ПАНЕЛЬ НАСТРОЕК --- */
         .settings-bar {
-            background: #ffffff;
+            background: var(--card-bg);
             border: 1px solid var(--border);
             padding: 12px;
             border-radius: 14px;
@@ -147,7 +147,6 @@
             display: none;
             flex-direction: column;
             gap: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
         .settings-bar.active {
@@ -180,7 +179,6 @@
             padding: 12px 14px;
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
             position: relative;
         }
 
@@ -216,24 +214,24 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #eff6ff;
+            background: rgba(59, 130, 246, 0.15);
             color: var(--primary);
             padding: 2px 8px;
             border-radius: 10px;
             font-size: 12px;
             font-weight: 700;
-            border: 1px solid #bfdbfe;
+            border: 1px solid rgba(59, 130, 246, 0.3);
             margin-top: 2px;
         }
 
-        /* --- МОДАЛЬНОЕ ОКНО СТУДЕНТОВ --- */
+        /* --- МОДАЛЬНОЕ ОКНО --- */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.4);
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(4px);
             z-index: 10000;
             display: none;
@@ -247,18 +245,12 @@
         }
 
         .modal-card {
-            background: #ffffff;
+            background: var(--card-bg);
             width: 100%;
             max-width: 360px;
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            animation: modalUp 0.25s ease-out;
-        }
-
-        @keyframes modalUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            border: 1px solid var(--border);
         }
 
         .modal-header {
@@ -274,7 +266,7 @@
         }
 
         .modal-close {
-            background: #f1f5f9;
+            background: var(--border);
             border: none;
             width: 28px;
             height: 28px;
@@ -297,7 +289,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 12px;
-            background: #f8fafc;
+            background: var(--bg);
             border-radius: 12px;
             border: 1px solid var(--border);
             font-size: 13px;
@@ -310,7 +302,6 @@
             padding: 16px;
             border-radius: var(--radius);
             border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
             margin-bottom: 16px;
         }
 
@@ -343,16 +334,14 @@
             padding: 10px 12px;
             border-radius: 12px;
             border: 1px solid var(--border);
-            background: #f8fafc;
+            background: var(--bg);
             font-size: 13px;
             color: var(--text-main);
             outline: none;
-            -webkit-appearance: none;
         }
 
         input:focus, select:focus {
             border-color: var(--primary);
-            background: #ffffff;
         }
 
         button {
@@ -362,7 +351,6 @@
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.15s;
         }
 
         button:active { opacity: 0.8; }
@@ -374,7 +362,7 @@
         }
 
         .btn-voice {
-            background: #f1f5f9;
+            background: var(--bg);
             color: var(--ai-color);
             border: 1px solid var(--border);
             width: 40px;
@@ -388,19 +376,6 @@
             flex-shrink: 0;
         }
 
-        .btn-voice.recording {
-            background: #fee2e2;
-            color: var(--danger);
-            border-color: #fca5a5;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
         /* --- СТУДЕНТЫ --- */
         .students-list {
             display: flex;
@@ -410,7 +385,7 @@
         }
 
         .student-chip {
-            background: #f1f5f9;
+            background: var(--bg);
             padding: 5px 12px;
             border-radius: 20px;
             font-size: 12px;
@@ -424,8 +399,6 @@
             color: var(--text-sub);
             cursor: pointer;
             font-weight: bold;
-            font-size: 14px;
-            line-height: 1;
         }
 
         /* --- РАСПИСАНИЕ --- */
@@ -444,7 +417,8 @@
 
         .day-column.is-today {
             border: 2px solid var(--primary);
-            background: #f0f7ff;
+            background: #1e293b;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
         }
 
         .day-header {
@@ -476,7 +450,7 @@
         }
 
         .lesson-card {
-            background: #ffffff;
+            background: var(--bg);
             border: 1px solid var(--border);
             border-left: 4px solid var(--primary);
             padding: 10px 12px;
@@ -488,8 +462,7 @@
 
         .lesson-card.completed {
             border-left-color: var(--success);
-            background: #f0fdf4;
-            opacity: 0.75;
+            opacity: 0.7;
         }
 
         .lesson-info {
@@ -525,9 +498,9 @@
         }
 
         .btn-zoom-icon {
-            background: #e0f2fe;
+            background: rgba(56, 189, 248, 0.15);
             color: var(--zoom);
-            border: 1px solid #bae6fd;
+            border: 1px solid rgba(56, 189, 248, 0.3);
             text-decoration: none;
             padding: 5px 9px;
             border-radius: 8px;
@@ -536,7 +509,7 @@
         }
 
         .btn-success-sm { background: var(--success); color: white; }
-        .btn-danger-sm { background: #fee2e2; color: var(--danger); }
+        .btn-danger-sm { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
     </style>
 </head>
 <body>
@@ -633,9 +606,7 @@
                 <div class="modal-title">Ваши ученики 🎓</div>
                 <button class="modal-close" onclick="closeStudentsModal()">✕</button>
             </div>
-            <div class="modal-students-list" id="modalStudentsList">
-                <!-- Заполняется динамически -->
-            </div>
+            <div class="modal-students-list" id="modalStudentsList"></div>
         </div>
     </div>
 
@@ -657,113 +628,67 @@
 
         document.getElementById('lessonDate').valueAsDate = new Date();
 
-        function getPraises() {
-            const nameStr = teacherName ? teacherName : "Учитель";
-            return [
-                "Шапка в двери! 🧢🚪",
-                "Не грусти, капуста! 🥬😉",
-                `Ну какова красота! ${nameStr}, вы сегодня просто машина по обучению 🚀`,
-                "London is the capital of... короче, ты и сама всё лучше всех знаешь 😉",
-                `Ученики думают, что вы преподаёте английский, а вы преподаёте стиль, ${nameStr} 😎`,
-                "Пауза! Срочно выпей чаю, а то этот Present Perfect сам себя не объяснит ☕",
-                "Ещё один урок — и можно требовать британское гражданство 🇬🇧",
-                `${nameStr}, осторожно! Уровень крутизны этого урока превышает все нормы ⚡`,
-                "Если бы за терпение на уроках давали премии, ты бы уже купила Майбах 💸",
-                "Английская королева гордилась бы тобой 👑",
-                "Минус один урок, плюс 100 к карме и к балансу на карте 💅"
-            ];
-        }
-
-        function getGrowthPhrases() {
-            const schoolTitle = teacherName ? `Школа ${teacherName}` : "Твоя школа";
-            const nameStr = teacherName ? teacherName : "Преподаватель";
-
-            return [
-                `🚀 Ещё один ученик в копилку! ${schoolTitle} уверенно расширяет границы!`,
-                "📈 Правильное направление! С каждым новым студентом растёт твой доход и мастерство!",
-                `✨ Новый студент — новая история успеха! ${nameStr}, ваша школа становится всё популярнее!`,
-                "👑 Плюс один! Ты не просто учишь людей — ты строишь свою собственную образовательную империю!",
-                `🎯 Отличная работа! ${nameStr}, динамика развития школы просто потрясающая!`
-            ];
-        }
-
         function showPraise(customText = null, isGrowth = false) {
             const toast = document.getElementById('praiseToast');
-            const praisesList = getPraises();
-            const randomPraise = customText || praisesList[Math.floor(Math.random() * praisesList.length)];
-            
-            toast.innerText = randomPraise;
-            
-            if (isGrowth) {
-                toast.classList.add('growth-toast');
-            } else {
-                toast.classList.remove('growth-toast');
-            }
-
+            const praises = [
+                "Шапка в двери! 🧢🚪",
+                "Ну какова красота! Вы сегодня просто машина по обучению 🚀",
+                "London is the capital of... короче, ты и сама всё лучше всех знаешь 😉",
+                "Пауза! Срочно выпей чаю, а то этот Present Perfect сам себя не объяснит ☕",
+                "Минус один урок, плюс 100 к карме и к балансу на карте 💅"
+            ];
+            toast.innerText = customText || praises[Math.floor(Math.random() * praises.length)];
+            toast.classList.toggle('growth-toast', isGrowth);
             toast.classList.add('show');
-
             if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 4000);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
         function toggleSettingsInput() {
-            const bar = document.getElementById('settingsBar');
-            bar.classList.toggle('active');
+            document.getElementById('settingsBar').classList.toggle('active');
         }
 
         function openZoomLink() {
-            if (zoomUrl) {
-                window.open(zoomUrl, '_blank');
-            } else {
-                alert('Ссылка на Zoom ещё не добавлена. Нажмите на ⚙️ чтобы настроить!');
+            if (zoomUrl) window.open(zoomUrl, '_blank');
+            else {
+                alert('Ссылка на Zoom ещё не добавлена!');
                 toggleSettingsInput();
             }
         }
 
         function openStudentsModal() {
             const listEl = document.getElementById('modalStudentsList');
-            listEl.innerHTML = '';
-
-            if (students.length === 0) {
-                listEl.innerHTML = '<p style="color:#94a3b8; font-size:13px; text-align:center; padding: 10px;">Студентов пока нет</p>';
-            } else {
-                students.forEach(s => {
-                    listEl.innerHTML += `
-                        <div class="modal-student-item">
-                            <span>👤 ${s.name}</span>
-                            <span style="color:var(--primary);">${s.rate} ₴/урок</span>
-                        </div>
-                    `;
-                });
-            }
-
+            listEl.innerHTML = students.length === 0 
+                ? '<p style="color:#94a3b8; font-size:13px; text-align:center;">Студентов пока нет</p>'
+                : students.map(s => `
+                    <div class="modal-student-item">
+                        <span>👤 ${s.name}</span>
+                        <span style="color:var(--primary);">${s.rate} ₴/урок</span>
+                    </div>
+                `).join('');
             document.getElementById('studentsModal').classList.add('active');
         }
 
-        function closeStudentsModal(e) {
+        function closeStudentsModal() {
             document.getElementById('studentsModal').classList.remove('active');
         }
 
-        // --- ЗАГРУЗКА ИЗ SUPABASE ---
         async function loadSupabaseData() {
+            if (!db) return;
             try {
-                const { data: stData } = await supabase.from('students').select('*');
+                const { data: stData } = await db.from('students').select('*');
                 if (stData) students = stData;
 
-                const { data: lsData } = await supabase.from('lessons').select('*');
+                const { data: lsData } = await db.from('lessons').select('*');
                 if (lsData) lessons = lsData;
 
-                // Загрузка настроек
-                const { data: cfgData } = await supabase.from('config').select('*');
+                const { data: cfgData } = await db.from('config').select('*');
                 if (cfgData) {
                     const zItem = cfgData.find(c => c.key === 'zoom_url');
                     if (zItem) {
                         zoomUrl = zItem.value || '';
                         document.getElementById('zoomUrl').value = zoomUrl;
                     }
-
                     const tItem = cfgData.find(c => c.key === 'teacher_name');
                     if (tItem) {
                         teacherName = tItem.value || '';
@@ -774,72 +699,51 @@
                 updateAppTitle();
                 render();
             } catch (err) {
-                console.error("Ошибка загрузки данных из Supabase:", err);
+                console.error("Ошибка Supabase:", err);
             }
         }
 
         function updateAppTitle() {
-            const titleEl = document.getElementById('appTitle');
-            if (teacherName && teacherName.trim() !== '') {
-                titleEl.innerText = `${teacherName}'s English School`;
-            } else {
-                titleEl.innerText = `English School`;
-            }
+            document.getElementById('appTitle').innerText = teacherName ? `${teacherName}'s English School` : `English School`;
         }
 
-        // --- СОХРАНЕНИЕ НАСТРОЕК ---
         async function saveSettings() {
             const inputName = document.getElementById('teacherNameInput').value.trim();
             const inputZoom = document.getElementById('zoomUrl').value.trim();
 
-            let isChanged = false;
-
             if (inputName !== teacherName) {
                 teacherName = inputName;
-                await supabase.from('config').upsert({ key: 'teacher_name', value: teacherName });
-                isChanged = true;
+                if (db) await db.from('config').upsert({ key: 'teacher_name', value: teacherName });
             }
 
             if (inputZoom !== zoomUrl) {
                 zoomUrl = inputZoom;
-                await supabase.from('config').upsert({ key: 'zoom_url', value: zoomUrl });
-                isChanged = true;
+                if (db) await db.from('config').upsert({ key: 'zoom_url', value: zoomUrl });
             }
 
-            if (isChanged) {
-                updateAppTitle();
-                document.getElementById('settingsBar').classList.remove('active');
-                alert('Настройки сохранены!');
-                render();
-            } else {
-                document.getElementById('settingsBar').classList.remove('active');
-            }
+            updateAppTitle();
+            document.getElementById('settingsBar').classList.remove('active');
+            render();
         }
 
         async function addStudent() {
             const name = document.getElementById('studentName').value.trim();
             const rate = parseFloat(document.getElementById('studentRate').value);
+            if (!name || isNaN(rate)) return alert('Заполните имя и ставку!');
 
-            if (!name || isNaN(rate)) {
-                alert('Заполните имя и ставку!');
-                return;
+            if (db) {
+                const { data } = await db.from('students').insert([{ name, rate }]).select();
+                if (data) students.push(data[0]);
+            } else {
+                students.push({ id: Date.now(), name, rate });
             }
-
-            const { data, error } = await supabase.from('students').insert([{ name, rate }]).select();
-            if (!error && data) {
-                students.push(data[0]);
-                document.getElementById('studentName').value = '';
-                document.getElementById('studentRate').value = '';
-                render();
-
-                const growthPhrases = getGrowthPhrases();
-                const randomGrowth = growthPhrases[Math.floor(Math.random() * growthPhrases.length)];
-                showPraise(randomGrowth, true);
-            }
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentRate').value = '';
+            render();
         }
 
         async function deleteStudent(id) {
-            await supabase.from('students').delete().eq('id', id);
+            if (db) await db.from('students').delete().eq('id', id);
             students = students.filter(s => s.id !== id);
             render();
         }
@@ -848,14 +752,9 @@
             const dateVal = document.getElementById('lessonDate').value;
             const timeVal = document.getElementById('lessonTime').value;
             const studentId = parseInt(document.getElementById('lessonStudentSelect').value);
-
-            if (!dateVal || !timeVal || !studentId) {
-                alert('Заполните дату, время и выберите студента!');
-                return;
-            }
+            if (!dateVal || !timeVal || !studentId) return alert('Заполните дату, время и выберите студента!');
 
             const student = students.find(s => s.id === studentId);
-
             const newLesson = {
                 day: dateVal,
                 lesson_date: dateVal,
@@ -865,176 +764,33 @@
                 completed: false
             };
 
-            const { data, error } = await supabase.from('lessons').insert([newLesson]).select();
-            if (!error && data) {
-                lessons.push(data[0]);
-                render();
+            if (db) {
+                const { data } = await db.from('lessons').insert([newLesson]).select();
+                if (data) lessons.push(data[0]);
             } else {
-                alert("Ошибка сохранения урока!");
+                lessons.push({ ...newLesson, id: Date.now() });
             }
+            render();
         }
 
         async function toggleLessonStatus(id) {
             const lesson = lessons.find(l => l.id === id);
             if (lesson) {
-                const updatedCompleted = !lesson.completed;
-                await supabase.from('lessons').update({ completed: updatedCompleted }).eq('id', id);
-                lesson.completed = updatedCompleted;
+                lesson.completed = !lesson.completed;
+                if (db) await db.from('lessons').update({ completed: lesson.completed }).eq('id', id);
                 render();
             }
         }
 
         async function deleteLesson(id) {
-            await supabase.from('lessons').delete().eq('id', id);
+            if (db) await db.from('lessons').delete().eq('id', id);
             lessons = lessons.filter(l => l.id !== id);
             render();
         }
 
-        // --- ГОЛОСОВОЙ ВВОД ---
-        let mediaRecorder = null;
-        let audioChunks = [];
-        let activeVoiceTarget = null;
-
-        async function toggleVoiceTarget(target) {
-            if (activeVoiceTarget === target) {
-                stopVoiceRecording();
-            } else {
-                if (activeVoiceTarget) stopVoiceRecording();
-                await startVoiceRecording(target);
-            }
-        }
-
-        async function startVoiceRecording(target) {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                
-                let options = {};
-                if (MediaRecorder.isTypeSupported('audio/mp4')) {
-                    options = { mimeType: 'audio/mp4' };
-                } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-                    options = { mimeType: 'audio/webm' };
-                }
-
-                mediaRecorder = new MediaRecorder(stream, options);
-                audioChunks = [];
-                activeVoiceTarget = target;
-
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) audioChunks.push(event.data);
-                };
-
-                mediaRecorder.onstop = async () => {
-                    const mimeType = mediaRecorder.mimeType || 'audio/mp4';
-                    const audioBlob = new Blob(audioChunks, { type: mimeType });
-                    stream.getTracks().forEach(track => track.stop());
-                    await processAudioWhisper(audioBlob, target);
-                };
-
-                mediaRecorder.start();
-
-                const btn = (target === 'student') ? document.getElementById('voiceStudentBtn') : document.getElementById('voiceLessonBtn');
-                btn.classList.add('recording');
-                btn.innerText = '🔴';
-            } catch (err) {
-                alert('Ошибка доступа к микрофону!');
-                console.error(err);
-            }
-        }
-
-        function stopVoiceRecording() {
-            if (mediaRecorder && activeVoiceTarget) {
-                const target = activeVoiceTarget;
-                mediaRecorder.stop();
-                activeVoiceTarget = null;
-
-                const btn = (target === 'student') ? document.getElementById('voiceStudentBtn') : document.getElementById('voiceLessonBtn');
-                btn.classList.remove('recording');
-                btn.innerText = '⏳';
-            }
-        }
-
-        async function processAudioWhisper(audioBlob, target) {
-            const btn = (target === 'student') ? document.getElementById('voiceStudentBtn') : document.getElementById('voiceLessonBtn');
-
-            if (!GROQ_API_KEY) {
-                alert("Ошибка: Укажите GROQ_API_KEY!");
-                btn.innerText = '🎤';
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append("file", audioBlob, "audio.m4a");
-            formData.append("model", "whisper-large-v3-turbo");
-            formData.append("language", "ru");
-
-            try {
-                const response = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${GROQ_API_KEY}` },
-                    body: formData
-                });
-
-                const data = await response.json();
-                
-                if (data.text) {
-                    fillFieldsFromSpeech(data.text, target);
-                } else {
-                    alert("Не удалось разобрать речь.");
-                }
-            } catch (err) {
-                console.error("Ошибка сети Whisper:", err);
-                alert("Ошибка соединения.");
-            } finally {
-                btn.innerText = '🎤';
-            }
-        }
-
-        function fillFieldsFromSpeech(text, target) {
-            const lower = text.toLowerCase();
-
-            if (target === 'student') {
-                const rateMatch = lower.match(/(\d{3,5})/);
-                if (rateMatch) {
-                    document.getElementById('studentRate').value = rateMatch[1];
-                }
-                
-                let words = lower.replace(/добавить|студента|ученика|ставка|ставкой|грн|гривен|\d+/g, '').trim().split(/\s+/);
-                let nameWords = words.filter(w => w.length > 1);
-                if (nameWords.length > 0) {
-                    let name = nameWords[0].charAt(0).toUpperCase() + nameWords[0].slice(1);
-                    document.getElementById('studentName').value = name;
-                }
-            } else if (target === 'lesson') {
-                const now = new Date();
-                let targetDate = new Date();
-
-                if (lower.includes('завтра')) {
-                    targetDate.setDate(now.getDate() + 1);
-                } else if (lower.includes('послезавтра')) {
-                    targetDate.setDate(now.getDate() + 2);
-                }
-                document.getElementById('lessonDate').valueAsDate = targetDate;
-
-                const timeMatch = lower.match(/(\d{1,2})[:\s](\d{2})/) || lower.match(/в\s(\d{1,2})/);
-                if (timeMatch) {
-                    let h = parseInt(timeMatch[1]);
-                    let m = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
-                    if (h < 24) {
-                        document.getElementById('lessonTime').value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-                    }
-                }
-
-                let foundStudent = students.find(s => lower.includes((s.name || '').toLowerCase()));
-                if (foundStudent) {
-                    document.getElementById('lessonStudentSelect').value = foundStudent.id;
-                }
-            }
-        }
-
-        // Вспомогательная функция для получения списка дат текущей недели (Пн -> Вс)
         function getCurrentWeekDates() {
             const now = new Date();
-            const currentDay = now.getDay(); // 0 - Вс, 1 - Пн ...
+            const currentDay = now.getDay();
             const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
             
             const monday = new Date(now);
@@ -1052,24 +808,20 @@
             return weekDates;
         }
 
-        // RENDER
         function render() {
-            const studentsListEl = document.getElementById('studentsList');
+            // Студенты
+            document.getElementById('studentsList').innerHTML = students.map(s => `
+                <div class="student-chip">
+                    <span><b>${s.name}</b> (${s.rate}₴)</span>
+                    <span class="del-btn" onclick="deleteStudent(${s.id})">✕</span>
+                </div>
+            `).join('');
+
             const studentSelectEl = document.getElementById('lessonStudentSelect');
-            
-            studentsListEl.innerHTML = '';
-            studentSelectEl.innerHTML = '<option value="">Выберите студента</option>';
+            studentSelectEl.innerHTML = '<option value="">Выберите студента</option>' + 
+                students.map(s => `<option value="${s.id}">${s.name} (${s.rate} ₴)</option>`).join('');
 
-            students.forEach(s => {
-                studentsListEl.innerHTML += `
-                    <div class="student-chip">
-                        <span><b>${s.name}</b> (${s.rate}₴)</span>
-                        <span class="del-btn" onclick="deleteStudent(${s.id})">✕</span>
-                    </div>
-                `;
-                studentSelectEl.innerHTML += `<option value="${s.id}">${s.name} (${s.rate} ₴)</option>`;
-            });
-
+            // Расписание
             const weekGridEl = document.getElementById('weekGrid');
             weekGridEl.innerHTML = '';
 
@@ -1080,7 +832,6 @@
             const now = new Date();
             const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-            // Группируем уроки по дате
             const groupedLessons = {};
             lessons.forEach(l => {
                 const dateKey = l.lesson_date || l.day || todayStr;
@@ -1093,54 +844,38 @@
                 }
             });
 
-            // Формируем список дат недели (Пн -> Вс) + добавляем любые даты уроков вне текущей недели
             const weekDates = getCurrentWeekDates();
             const allDatesSet = new Set([...weekDates, ...Object.keys(groupedLessons)]);
             const sortedDates = Array.from(allDatesSet).sort();
 
             sortedDates.forEach(dateKey => {
                 const dayLessons = (groupedLessons[dateKey] || []).sort((a, b) => a.time.localeCompare(b.time));
-                
-                // Рассчитываем дату без проблем с часовыми поясами
                 const parts = dateKey.split('-');
                 const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
 
                 const isToday = (dateKey === todayStr);
-                if (isToday) {
-                    todayLessonsCountVal = dayLessons.length;
-                }
+                if (isToday) todayLessonsCountVal = dayLessons.length;
 
                 const dayName = daysOfWeek[dateObj.getDay()] || 'Урок';
                 const formattedDate = `${dayName}, ${dateObj.getDate()} ${months[dateObj.getMonth()]}`;
 
-                let lessonsHtml = '';
-                if (dayLessons.length === 0) {
-                    lessonsHtml = '<div class="no-lessons">Нет уроков</div>';
-                } else {
-                    dayLessons.forEach(l => {
-                        const zoomBtnHtml = zoomUrl 
-                            ? `<a href="${zoomUrl}" target="_blank" class="btn-zoom-icon">🎥 Zoom</a>` 
-                            : '';
-
-                        const sName = l.student_name || 'Студент';
-
-                        lessonsHtml += `
-                            <div class="lesson-card ${l.completed ? 'completed' : ''}">
-                                <div class="lesson-info">
-                                    <span class="lesson-time">${l.time} ${l.completed ? '✓' : ''}</span>
-                                    <span class="lesson-student">${sName} (${l.rate}₴)</span>
-                                </div>
-                                <div class="lesson-actions">
-                                    ${zoomBtnHtml}
-                                    <button class="btn-sm ${l.completed ? 'btn-danger-sm' : 'btn-success-sm'}" onclick="toggleLessonStatus(${l.id})">
-                                        ${l.completed ? '↩' : '✓'}
-                                    </button>
-                                    <button class="btn-sm btn-danger-sm" onclick="deleteLesson(${l.id})">✕</button>
-                                </div>
+                let lessonsHtml = dayLessons.length === 0 
+                    ? '<div class="no-lessons">Нет уроков</div>'
+                    : dayLessons.map(l => `
+                        <div class="lesson-card ${l.completed ? 'completed' : ''}">
+                            <div class="lesson-info">
+                                <span class="lesson-time">${l.time} ${l.completed ? '✓' : ''}</span>
+                                <span class="lesson-student">${l.student_name || 'Студент'} (${l.rate}₴)</span>
                             </div>
-                        `;
-                    });
-                }
+                            <div class="lesson-actions">
+                                ${zoomUrl ? `<a href="${zoomUrl}" target="_blank" class="btn-zoom-icon">🎥 Zoom</a>` : ''}
+                                <button class="btn-sm ${l.completed ? 'btn-danger-sm' : 'btn-success-sm'}" onclick="toggleLessonStatus(${l.id})">
+                                    ${l.completed ? '↩' : '✓'}
+                                </button>
+                                <button class="btn-sm btn-danger-sm" onclick="deleteLesson(${l.id})">✕</button>
+                            </div>
+                        </div>
+                    `).join('');
 
                 weekGridEl.innerHTML += `
                     <div class="day-column ${isToday ? 'is-today' : ''}">
@@ -1161,6 +896,9 @@
             document.getElementById('earnedIncome').innerText = `${earnedIncomeVal} ₴`;
         }
 
+        // Рендерим интерфейс сходу
+        render();
+        // Грузим из базы
         loadSupabaseData();
     </script>
 </body>
