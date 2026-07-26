@@ -105,7 +105,7 @@
             color: #e11d48;
         }
 
-        /* --- ВСПЛЫВАЮЩАЯ ПОХВАЛА (TOAST) --- */
+        /* --- ВСПЛЫВАЮЩАЯ ПОХВАЛА --- */
         .praise-toast {
             position: fixed;
             top: -100px;
@@ -321,6 +321,11 @@
             border: 1px solid var(--border);
         }
 
+        .day-column.is-today {
+            border: 2px solid var(--primary);
+            background: #f0f7ff;
+        }
+
         .day-header {
             font-weight: 700;
             font-size: 13px;
@@ -332,6 +337,10 @@
             justify-content: space-between;
         }
 
+        .day-column.is-today .day-header {
+            color: var(--primary);
+        }
+
         .lessons-list {
             display: flex;
             flex-direction: column;
@@ -339,7 +348,7 @@
         }
 
         .lesson-card {
-            background: #f8fafc;
+            background: #ffffff;
             border: 1px solid var(--border);
             border-left: 4px solid var(--primary);
             padding: 10px 12px;
@@ -461,15 +470,7 @@
     <div class="section-box">
         <div class="section-title">Запланировать урок</div>
         <div class="form-grid">
-            <select id="lessonDay">
-                <option value="Понедельник">Понедельник</option>
-                <option value="Вторник">Вторник</option>
-                <option value="Среда">Среда</option>
-                <option value="Четверг">Четверг</option>
-                <option value="Пятница">Пятница</option>
-                <option value="Суббота">Суббота</option>
-                <option value="Воскресенье">Воскресенье</option>
-            </select>
+            <input type="date" id="lessonDate">
             <input type="time" id="lessonTime" value="15:00">
         </div>
         <div class="form-grid full" style="margin-bottom: 8px;">
@@ -478,13 +479,13 @@
             </select>
         </div>
         <div class="form-actions">
-            <button class="btn-voice" id="voiceLessonBtn" onclick="toggleVoiceTarget('lesson')" title="Надиктовать день, время и имя">🎤</button>
+            <button class="btn-voice" id="voiceLessonBtn" onclick="toggleVoiceTarget('lesson')" title="Надиктовать дату, время и имя">🎤</button>
             <button class="btn-primary" onclick="addLesson()">+ Запланировать урок</button>
         </div>
     </div>
 
     <!-- РАСПИСАНИЕ -->
-    <div class="section-title" style="margin: 18px 2px 10px 2px;">Расписание на неделю</div>
+    <div class="section-title" style="margin: 18px 2px 10px 2px;">Расписание занятий</div>
     <div class="week-grid" id="weekGrid"></div>
 
     <script>
@@ -494,8 +495,9 @@
             tg.expand();
         }
 
-        const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
-        
+        const daysOfWeek = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+        const months = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+
         const praises = [
             "Шапка в двери! 🧢🚪",
             "Не грусти, капуста! 🥬😉",
@@ -514,6 +516,9 @@
         let lessons = [];
         let zoomUrl = '';
         let toastTimeout = null;
+
+        // Устанавливаем сегодняшнюю дату по умолчанию
+        document.getElementById('lessonDate').valueAsDate = new Date();
 
         function showPraise() {
             const toast = document.getElementById('praiseToast');
@@ -596,20 +601,21 @@
         }
 
         async function addLesson() {
-            const day = document.getElementById('lessonDay').value;
-            const time = document.getElementById('lessonTime').value;
+            const dateVal = document.getElementById('lessonDate').value;
+            const timeVal = document.getElementById('lessonTime').value;
             const studentId = parseInt(document.getElementById('lessonStudentSelect').value);
 
-            if (!studentId) {
-                alert('Выберите студента!');
+            if (!dateVal || !timeVal || !studentId) {
+                alert('Заполните дату, время и выберите студента!');
                 return;
             }
 
             const student = students.find(s => s.id === studentId);
 
             const newLesson = {
-                day,
-                time,
+                day: dateVal, // сохраняем и дату
+                lesson_date: dateVal,
+                time: timeVal,
                 student_name: student.name,
                 rate: student.rate,
                 completed: false
@@ -619,6 +625,8 @@
             if (!error && data) {
                 lessons.push(data[0]);
                 render();
+            } else {
+                alert("Ошибка сохранения урока!");
             }
         }
 
@@ -638,7 +646,7 @@
             render();
         }
 
-        // --- ГОЛОСОВОЙ ВВОД (GROQ WHISPER) ---
+        // --- ГОЛОСОВОЙ ВВОД ---
         let mediaRecorder = null;
         let audioChunks = [];
         let activeVoiceTarget = null;
@@ -753,15 +761,15 @@
                     document.getElementById('studentName').value = name;
                 }
             } else if (target === 'lesson') {
-                let foundDay = days.find(d => lower.includes(d.toLowerCase()));
-                if (!foundDay) {
-                    const todayIdx = (new Date().getDay() + 6) % 7;
-                    if (lower.includes('сегодня')) foundDay = days[todayIdx];
-                    if (lower.includes('завтра')) foundDay = days[(todayIdx + 1) % 7];
+                const now = new Date();
+                let targetDate = new Date();
+
+                if (lower.includes('завтра')) {
+                    targetDate.setDate(now.getDate() + 1);
+                } else if (lower.includes('послезавтра')) {
+                    targetDate.setDate(now.getDate() + 2);
                 }
-                if (foundDay) {
-                    document.getElementById('lessonDay').value = foundDay;
-                }
+                document.getElementById('lessonDate').valueAsDate = targetDate;
 
                 const timeMatch = lower.match(/(\d{1,2})[:\s](\d{2})/) || lower.match(/в\s(\d{1,2})/);
                 if (timeMatch) {
@@ -802,33 +810,51 @@
 
             let earnedIncomeVal = 0;
             let completedCount = 0;
-
-            const now = new Date();
-            const currentDayIdx = (now.getDay() + 6) % 7;
-            const todayName = days[currentDayIdx];
             let todayLessonsCountVal = 0;
 
-            days.forEach(day => {
-                const dayLessons = lessons
-                    .filter(l => l.day === day)
-                    .sort((a, b) => a.time.localeCompare(b.time));
+            const todayStr = new Date().toISOString().split('T')[0];
 
-                if (day === todayName) {
+            // Группируем уроки по датам
+            const groupedLessons = {};
+            lessons.forEach(l => {
+                const dateKey = l.lesson_date || l.day || todayStr;
+                if (!groupedLessons[dateKey]) groupedLessons[dateKey] = [];
+                groupedLessons[dateKey].push(l);
+
+                if (l.completed) {
+                    earnedIncomeVal += l.rate;
+                    completedCount++;
+                }
+            });
+
+            // Сортируем даты по возрастанию
+            const sortedDates = Object.keys(groupedLessons).sort();
+
+            if (sortedDates.length === 0) {
+                weekGridEl.innerHTML = '<p style="color:#94a3b8; font-size:13px; text-align:center; padding: 12px;">Запланированных уроков пока нет</p>';
+            }
+
+            sortedDates.forEach(dateKey => {
+                const dayLessons = groupedLessons[dateKey].sort((a, b) => a.time.localeCompare(b.time));
+                const dateObj = new Date(dateKey);
+
+                const isToday = (dateKey === todayStr);
+                if (isToday) {
                     todayLessonsCountVal = dayLessons.length;
                 }
 
+                const dayName = daysOfWeek[dateObj.getDay()] || 'Урок';
+                const formattedDate = !isNaN(dateObj.getTime()) 
+                    ? `${dayName}, ${dateObj.getDate()} ${months[dateObj.getMonth()]}` 
+                    : dateKey;
+
                 let lessonsHtml = '';
                 dayLessons.forEach(l => {
-                    if (l.completed) {
-                        earnedIncomeVal += l.rate;
-                        completedCount++;
-                    }
-
                     const zoomBtnHtml = zoomUrl 
                         ? `<a href="${zoomUrl}" target="_blank" class="btn-zoom-icon">🎥 Zoom</a>` 
                         : '';
 
-                    const sName = l.student_name || l.studentName || 'Студент';
+                    const sName = l.student_name || 'Студент';
 
                     lessonsHtml += `
                         <div class="lesson-card ${l.completed ? 'completed' : ''}">
@@ -848,13 +874,13 @@
                 });
 
                 weekGridEl.innerHTML += `
-                    <div class="day-column">
+                    <div class="day-column ${isToday ? 'is-today' : ''}">
                         <div class="day-header">
-                            <span>${day} ${day === todayName ? '• Сегодня' : ''}</span>
+                            <span>${formattedDate} ${isToday ? '• Сегодня' : ''}</span>
                             <span>${dayLessons.length} ур.</span>
                         </div>
                         <div class="lessons-list">
-                            ${lessonsHtml || '<p style="color:#94a3b8; font-size:12px; text-align:center; padding: 4px;">Нет уроков</p>'}
+                            ${lessonsHtml}
                         </div>
                     </div>
                 `;
