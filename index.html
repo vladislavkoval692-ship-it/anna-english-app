@@ -92,34 +92,6 @@
             cursor: pointer;
         }
 
-        .btn-heart {
-            background: rgba(225, 29, 72, 0.15);
-            border: 1px solid rgba(225, 29, 72, 0.3);
-            color: #fb7185;
-        }
-
-        .praise-toast {
-            position: fixed;
-            top: -120px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--card-bg);
-            border: 2px solid #fecdd3;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            padding: 12px 18px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #fb7185;
-            z-index: 9999;
-            transition: top 0.4s ease;
-            text-align: center;
-            max-width: 85%;
-            pointer-events: none;
-        }
-
-        .praise-toast.show { top: 20px; }
-
         .settings-bar {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -173,14 +145,28 @@
             transition: all 0.2s ease;
         }
 
-        .mic-btn.listening {
-            background: rgba(239, 68, 68, 0.2);
+        .mic-btn-action {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .listening {
+            background: rgba(239, 68, 68, 0.2) !important;
+            border-color: var(--danger) !important;
             animation: pulse 1s infinite alternate;
         }
 
         @keyframes pulse {
             0% { transform: scale(1); }
-            100% { transform: scale(1.15); }
+            100% { transform: scale(1.1); }
         }
 
         .stats-grid {
@@ -578,15 +564,12 @@
 </head>
 <body>
 
-    <div class="praise-toast" id="praiseToast">💖 Вы отличный учитель!</div>
-
     <header class="app-header">
         <div class="app-title" id="appTitle">English School</div>
         <div class="header-actions">
             <button class="btn-premium-badge" onclick="openPaywallModal()">⭐ <span id="headerPlanText">Free</span></button>
             <button class="btn-zoom-main" onclick="openZoomLink()">🎥 Zoom</button>
             <button class="btn-icon-top" onclick="toggleSettingsInput()">⚙️</button>
-            <button class="btn-icon-top btn-heart" onclick="showPraise()">💖</button>
         </div>
     </header>
 
@@ -658,6 +641,7 @@
         </div>
         <div class="form-actions">
             <button class="btn-primary" onclick="addLesson()">+ Запланировать урок</button>
+            <button class="mic-btn-action" onclick="startVoiceLessonSchedule(this)" title="Надиктовать урок голосом">🎙️</button>
         </div>
     </div>
 
@@ -730,20 +714,16 @@
         let students = [];
         let lessons = [];
         let zoomUrl = '';
-        let toastTimeout = null;
         let isExpanded = false;
 
         const FREE_STUDENT_LIMIT = 3;
 
         document.getElementById('lessonDate').valueAsDate = new Date();
 
-        /* --- ГОЛОСОВОЙ ВВОД (WEB SPEECH API) --- */
+        /* --- ГОЛОСОВОЙ ВВОД ДЛЯ ПРОСТЫХ ПОЛЕЙ --- */
         function startVoiceInput(inputId, btnEl) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert('К сожалению, ваш браузер или устройство не поддерживает голосовой ввод.');
-                return;
-            }
+            if (!SpeechRecognition) return alert('Голосовой ввод не поддерживается браузером.');
 
             const recognition = new SpeechRecognition();
             recognition.lang = 'ru-RU';
@@ -755,33 +735,70 @@
                 const text = event.results[0][0].transcript;
                 const inputEl = document.getElementById(inputId);
                 if (inputEl) {
-                    // Делаем первую букву заглавной
                     inputEl.value = text.charAt(0).toUpperCase() + text.slice(1);
                 }
             };
 
-            recognition.onerror = () => {
-                btnEl.classList.remove('listening');
-            };
-
-            recognition.onend = () => {
-                btnEl.classList.remove('listening');
-            };
-
+            recognition.onerror = () => btnEl.classList.remove('listening');
+            recognition.onend = () => btnEl.classList.remove('listening');
             recognition.start();
         }
 
-        function showPraise() {
-            const toast = document.getElementById('praiseToast');
-            const praises = [
-                "Ну какова красота! Вы сегодня просто машина 🚀",
-                "London is the capital of... ты всё знаешь лучше всех 😉",
-                "Минус один урок, плюс 100 к карме и балансу 💅"
-            ];
-            toast.innerText = praises[Math.floor(Math.random() * praises.length)];
-            toast.classList.add('show');
-            if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        /* --- ГОЛОСОВОЙ ВВОД ДЛЯ ЗАПЛАНИРОВАНИЯ УРОКА --- */
+        function startVoiceLessonSchedule(btnEl) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return alert('Голосовой ввод не поддерживается браузером.');
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ru-RU';
+            recognition.interimResults = false;
+
+            btnEl.classList.add('listening');
+
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript.toLowerCase();
+                
+                // 1. Поиск студента в списке
+                const matchedStudent = students.find(s => text.includes(s.name.toLowerCase()));
+                if (matchedStudent) {
+                    document.getElementById('lessonStudentSelect').value = matchedStudent.id;
+                }
+
+                // 2. Поиск времени (например "в 15:00", "14 00", "в 9 утра")
+                const timeMatch = text.match(/(\d{1,2})[:\s]?(\d{2})?/);
+                if (timeMatch) {
+                    let hours = parseInt(timeMatch[1]);
+                    let minutes = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+                    if (hours < 24) {
+                        const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                        document.getElementById('lessonTime').value = formattedTime;
+                    }
+                }
+
+                // 3. Поиск даты (сегодня, завтра, дни недели)
+                const now = new Date();
+                if (text.includes('завтра')) {
+                    now.setDate(now.getDate() + 1);
+                    document.getElementById('lessonDate').valueAsDate = now;
+                } else {
+                    const daysMap = {'понедельник': 1, 'вторник': 2, 'среда': 3, 'четверг': 4, 'пятница': 5, 'суббота': 6, 'воскресенье': 0};
+                    for (let day in daysMap) {
+                        if (text.includes(day)) {
+                            let targetDay = daysMap[day];
+                            let currentDay = now.getDay();
+                            let diff = targetDay - currentDay;
+                            if (diff <= 0) diff += 7;
+                            now.setDate(now.getDate() + diff);
+                            document.getElementById('lessonDate').valueAsDate = now;
+                            break;
+                        }
+                    }
+                }
+            };
+
+            recognition.onerror = () => btnEl.classList.remove('listening');
+            recognition.onend = () => btnEl.classList.remove('listening');
+            recognition.start();
         }
 
         function toggleSettingsInput() {
