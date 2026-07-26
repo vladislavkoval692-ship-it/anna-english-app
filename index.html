@@ -642,7 +642,7 @@
         const daysOfWeek = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
         const months = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
-        let teacherName = ""; // Изначально пустое
+        let teacherName = "";
         let students = [];
         let lessons = [];
         let zoomUrl = '';
@@ -753,13 +753,13 @@
                 if (cfgData) {
                     const zItem = cfgData.find(c => c.key === 'zoom_url');
                     if (zItem) {
-                        zoomUrl = zItem.value;
+                        zoomUrl = zItem.value || '';
                         document.getElementById('zoomUrl').value = zoomUrl;
                     }
 
                     const tItem = cfgData.find(c => c.key === 'teacher_name');
-                    if (tItem && tItem.value) {
-                        teacherName = tItem.value;
+                    if (tItem) {
+                        teacherName = tItem.value || '';
                         document.getElementById('teacherNameInput').value = teacherName;
                     }
                 }
@@ -780,18 +780,35 @@
             }
         }
 
+        // --- ИСПРАВЛЕННОЕ СОХРАНЕНИЕ НАСТРОЕК ---
         async function saveSettings() {
-            zoomUrl = document.getElementById('zoomUrl').value.trim();
-            const newTeacherName = document.getElementById('teacherNameInput').value.trim();
+            const inputName = document.getElementById('teacherNameInput').value.trim();
+            const inputZoom = document.getElementById('zoomUrl').value.trim();
 
-            teacherName = newTeacherName;
-            await supabase.from('config').upsert({ key: 'teacher_name', value: teacherName });
-            await supabase.from('config').upsert({ key: 'zoom_url', value: zoomUrl });
+            let isChanged = false;
 
-            updateAppTitle();
-            document.getElementById('settingsBar').classList.remove('active');
-            alert('Настройки успешно сохранены!');
-            render();
+            // Если заполнено имя — обновляем его
+            if (inputName !== teacherName) {
+                teacherName = inputName;
+                await supabase.from('config').upsert({ key: 'teacher_name', value: teacherName });
+                isChanged = true;
+            }
+
+            // Если заполнена ссылка Zoom — обновляем её
+            if (inputZoom !== zoomUrl) {
+                zoomUrl = inputZoom;
+                await supabase.from('config').upsert({ key: 'zoom_url', value: zoomUrl });
+                isChanged = true;
+            }
+
+            if (isChanged) {
+                updateAppTitle();
+                document.getElementById('settingsBar').classList.remove('active');
+                alert('Настройки сохранены!');
+                render();
+            } else {
+                document.getElementById('settingsBar').classList.remove('active');
+            }
         }
 
         async function addStudent() {
