@@ -6,18 +6,6 @@
     <title>English School App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        // =========================================================
-        // 🔑 КЛЮЧИ И НАСТРОЙКИ:
-        // =========================================================
-        const GROQ_API_KEY = "gsk_eSdUfc3wqNfiDXqbGs2jWGdyb3" + "FYfzEaL2rTWZUHK890HX92ICXE"; 
-
-        const SUPABASE_URL = "https://myxospyofguyjskpbfnt.supabase.co"; 
-        const SUPABASE_KEY = "sb_publishable__yFLFUaOvySO0Kfq3kynaw_AltSdqzX"; 
-
-        // Переименовали в db, чтобы JS не падал
-        const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
-    </script>
     <style>
         :root {
             --bg: #0f172a;
@@ -131,12 +119,6 @@
             top: 20px;
         }
 
-        .praise-toast.growth-toast {
-            border-color: #10b981;
-            color: #34d399;
-            background: var(--card-bg);
-        }
-
         /* --- ПАНЕЛЬ НАСТРОЕК --- */
         .settings-bar {
             background: var(--card-bg);
@@ -199,15 +181,6 @@
 
         .stat-card-clickable {
             cursor: pointer;
-            transition: transform 0.1s ease, border-color 0.2s;
-        }
-
-        .stat-card-clickable:active {
-            transform: scale(0.97);
-        }
-
-        .stat-card-clickable:hover {
-            border-color: var(--primary);
         }
 
         .student-badge-btn {
@@ -340,10 +313,6 @@
             outline: none;
         }
 
-        input:focus, select:focus {
-            border-color: var(--primary);
-        }
-
         button {
             padding: 10px 14px;
             border-radius: 12px;
@@ -353,27 +322,10 @@
             cursor: pointer;
         }
 
-        button:active { opacity: 0.8; }
-
         .btn-primary {
             background: var(--primary);
             color: white;
             flex: 1;
-        }
-
-        .btn-voice {
-            background: var(--bg);
-            color: var(--ai-color);
-            border: 1px solid var(--border);
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            font-size: 17px;
-            flex-shrink: 0;
         }
 
         /* --- СТУДЕНТЫ --- */
@@ -417,7 +369,6 @@
 
         .day-column.is-today {
             border: 2px solid var(--primary);
-            background: #1e293b;
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
         }
 
@@ -514,7 +465,7 @@
 </head>
 <body>
 
-    <!-- ВСПЛЫВАЮЩАЯ ПОХВАЛА И УВЕДОМЛЕНИЯ -->
+    <!-- ВСПЛЫВАЮЩАЯ ПОХВАЛА -->
     <div class="praise-toast" id="praiseToast">💖 Вы отличный учитель!</div>
 
     <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
@@ -522,12 +473,12 @@
         <div class="app-title" id="appTitle">English School</div>
         <div class="header-actions">
             <button class="btn-zoom-main" onclick="openZoomLink()">🎥 Zoom</button>
-            <button class="btn-icon-top" onclick="toggleSettingsInput()" title="Настройки">⚙️</button>
-            <button class="btn-icon-top btn-heart" onclick="showPraise()" title="Получить заряд бодрости">💖</button>
+            <button class="btn-icon-top" onclick="toggleSettingsInput()">⚙️</button>
+            <button class="btn-icon-top btn-heart" onclick="showPraise()">💖</button>
         </div>
     </header>
 
-    <!-- Настройки приложения -->
+    <!-- Настройки -->
     <div class="settings-bar" id="settingsBar">
         <div class="settings-field">
             <label>Имя преподавателя</label>
@@ -550,7 +501,7 @@
             <h3>Уроки сегодня</h3>
             <div class="value" id="todayLessonsCount">0</div>
         </div>
-        <div class="stat-card stat-card-clickable" onclick="openStudentsModal()" title="Нажмите, чтобы посмотреть всех студентов">
+        <div class="stat-card stat-card-clickable" onclick="openStudentsModal()">
             <h3>Студенты</h3>
             <div class="value">
                 <span id="totalStudentsCount">0</span>
@@ -571,7 +522,6 @@
             <input type="number" id="studentRate" placeholder="Ставка (₴)">
         </div>
         <div class="form-actions">
-            <button class="btn-voice" id="voiceStudentBtn" onclick="toggleVoiceTarget('student')" title="Надиктовать имя и ставку">🎤</button>
             <button class="btn-primary" onclick="addStudent()">Добавить студента</button>
         </div>
         <div class="students-list" id="studentsList"></div>
@@ -590,7 +540,6 @@
             </select>
         </div>
         <div class="form-actions">
-            <button class="btn-voice" id="voiceLessonBtn" onclick="toggleVoiceTarget('lesson')" title="Надиктовать дату, время и имя">🎤</button>
             <button class="btn-primary" onclick="addLesson()">+ Запланировать урок</button>
         </div>
     </div>
@@ -599,7 +548,7 @@
     <div class="section-title" style="margin: 18px 2px 10px 2px;">Расписание занятий</div>
     <div class="week-grid" id="weekGrid"></div>
 
-    <!-- МОДАЛЬНОЕ ОКНО СО СПИСКОМ ВСЕХ СТУДЕНТОВ -->
+    <!-- МОДАЛЬНОЕ ОКНО СО СПИСКОМ СТУДЕНТОВ -->
     <div class="modal-overlay" id="studentsModal" onclick="closeStudentsModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -611,10 +560,25 @@
     </div>
 
     <script>
-        const tg = window.Telegram ? window.Telegram.WebApp : null;
-        if (tg) {
-            tg.ready();
-            tg.expand();
+        // Инициализация Telegram WebApp
+        try {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+            }
+        } catch (e) { console.error("TG Error:", e); }
+
+        // Безопасная инициализация Supabase
+        const SUPABASE_URL = "https://myxospyofguyjskpbfnt.supabase.co"; 
+        const SUPABASE_KEY = "sb_publishable__yFLFUaOvySO0Kfq3kynaw_AltSdqzX"; 
+        let db = null;
+        
+        try {
+            if (window.supabase && typeof window.supabase.createClient === 'function') {
+                db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        } catch (e) {
+            console.warn("Supabase init bypassed:", e);
         }
 
         const daysOfWeek = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
@@ -628,20 +592,17 @@
 
         document.getElementById('lessonDate').valueAsDate = new Date();
 
-        function showPraise(customText = null, isGrowth = false) {
+        function showPraise() {
             const toast = document.getElementById('praiseToast');
             const praises = [
-                "Шапка в двери! 🧢🚪",
-                "Ну какова красота! Вы сегодня просто машина по обучению 🚀",
-                "London is the capital of... короче, ты и сама всё лучше всех знаешь 😉",
-                "Пауза! Срочно выпей чаю, а то этот Present Perfect сам себя не объяснит ☕",
-                "Минус один урок, плюс 100 к карме и к балансу на карте 💅"
+                "Ну какова красота! Вы сегодня просто машина 🚀",
+                "London is the capital of... ты всё знаешь лучше всех 😉",
+                "Минус один урок, плюс 100 к карме и балансу 💅"
             ];
-            toast.innerText = customText || praises[Math.floor(Math.random() * praises.length)];
-            toast.classList.toggle('growth-toast', isGrowth);
+            toast.innerText = praises[Math.floor(Math.random() * praises.length)];
             toast.classList.add('show');
             if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => toast.classList.remove('show'), 4000);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
         function toggleSettingsInput() {
@@ -673,6 +634,216 @@
             document.getElementById('studentsModal').classList.remove('active');
         }
 
+        function updateAppTitle() {
+            document.getElementById('appTitle').innerText = teacherName ? `${teacherName}'s English School` : `English School`;
+        }
+
+        async function saveSettings() {
+            teacherName = document.getElementById('teacherNameInput').value.trim();
+            zoomUrl = document.getElementById('zoomUrl').value.trim();
+
+            if (db) {
+                try {
+                    await db.from('config').upsert({ key: 'teacher_name', value: teacherName });
+                    await db.from('config').upsert({ key: 'zoom_url', value: zoomUrl });
+                } catch(e) {}
+            }
+
+            updateAppTitle();
+            document.getElementById('settingsBar').classList.remove('active');
+            render();
+        }
+
+        async function addStudent() {
+            const name = document.getElementById('studentName').value.trim();
+            const rate = parseFloat(document.getElementById('studentRate').value);
+            if (!name || isNaN(rate)) return alert('Заполните имя и ставку!');
+
+            if (db) {
+                try {
+                    const { data } = await db.from('students').insert([{ name, rate }]).select();
+                    if (data && data.length) students.push(data[0]);
+                    else students.push({ id: Date.now(), name, rate });
+                } catch(e) {
+                    students.push({ id: Date.now(), name, rate });
+                }
+            } else {
+                students.push({ id: Date.now(), name, rate });
+            }
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentRate').value = '';
+            render();
+        }
+
+        async function deleteStudent(id) {
+            if (db) {
+                try { await db.from('students').delete().eq('id', id); } catch(e){}
+            }
+            students = students.filter(s => s.id !== id);
+            render();
+        }
+
+        async function addLesson() {
+            const dateVal = document.getElementById('lessonDate').value;
+            const timeVal = document.getElementById('lessonTime').value;
+            const studentId = parseInt(document.getElementById('lessonStudentSelect').value);
+            if (!dateVal || !timeVal || !studentId) return alert('Заполните дату, время и выберите студента!');
+
+            const student = students.find(s => s.id === studentId);
+            const newLesson = {
+                day: dateVal,
+                lesson_date: dateVal,
+                time: timeVal,
+                student_name: student ? student.name : 'Студент',
+                rate: student ? student.rate : 0,
+                completed: false
+            };
+
+            if (db) {
+                try {
+                    const { data } = await db.from('lessons').insert([newLesson]).select();
+                    if (data && data.length) lessons.push(data[0]);
+                    else lessons.push({ ...newLesson, id: Date.now() });
+                } catch(e) {
+                    lessons.push({ ...newLesson, id: Date.now() });
+                }
+            } else {
+                lessons.push({ ...newLesson, id: Date.now() });
+            }
+            render();
+        }
+
+        async function toggleLessonStatus(id) {
+            const lesson = lessons.find(l => l.id === id);
+            if (lesson) {
+                lesson.completed = !lesson.completed;
+                if (db) {
+                    try { await db.from('lessons').update({ completed: lesson.completed }).eq('id', id); } catch(e){}
+                }
+                render();
+            }
+        }
+
+        async function deleteLesson(id) {
+            if (db) {
+                try { await db.from('lessons').delete().eq('id', id); } catch(e){}
+            }
+            lessons = lessons.filter(l => l.id !== id);
+            render();
+        }
+
+        function getCurrentWeekDates() {
+            const now = new Date();
+            const currentDay = now.getDay();
+            const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+            
+            const monday = new Date(now);
+            monday.setDate(now.getDate() + distanceToMonday);
+
+            const weekDates = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                weekDates.push(`${year}-${month}-${day}`);
+            }
+            return weekDates;
+        }
+
+        function render() {
+            try {
+                // Студенты
+                document.getElementById('studentsList').innerHTML = students.map(s => `
+                    <div class="student-chip">
+                        <span><b>${s.name}</b> (${s.rate}₴)</span>
+                        <span class="del-btn" onclick="deleteStudent(${s.id})">✕</span>
+                    </div>
+                `).join('');
+
+                const studentSelectEl = document.getElementById('lessonStudentSelect');
+                studentSelectEl.innerHTML = '<option value="">Выберите студента</option>' + 
+                    students.map(s => `<option value="${s.id}">${s.name} (${s.rate} ₴)</option>`).join('');
+
+                // Расписание
+                const weekGridEl = document.getElementById('weekGrid');
+                weekGridEl.innerHTML = '';
+
+                let earnedIncomeVal = 0;
+                let completedCount = 0;
+                let todayLessonsCountVal = 0;
+
+                const now = new Date();
+                const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+                const groupedLessons = {};
+                lessons.forEach(l => {
+                    const dateKey = l.lesson_date || l.day || todayStr;
+                    if (!groupedLessons[dateKey]) groupedLessons[dateKey] = [];
+                    groupedLessons[dateKey].push(l);
+
+                    if (l.completed) {
+                        earnedIncomeVal += (l.rate || 0);
+                        completedCount++;
+                    }
+                });
+
+                const weekDates = getCurrentWeekDates();
+                const allDatesSet = new Set([...weekDates, ...Object.keys(groupedLessons)]);
+                const sortedDates = Array.from(allDatesSet).sort();
+
+                sortedDates.forEach(dateKey => {
+                    const dayLessons = (groupedLessons[dateKey] || []).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+                    const parts = dateKey.split('-');
+                    const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+
+                    const isToday = (dateKey === todayStr);
+                    if (isToday) todayLessonsCountVal = dayLessons.length;
+
+                    const dayName = daysOfWeek[dateObj.getDay()] || 'Урок';
+                    const formattedDate = `${dayName}, ${dateObj.getDate()} ${months[dateObj.getMonth()]}`;
+
+                    let lessonsHtml = dayLessons.length === 0 
+                        ? '<div class="no-lessons">Нет уроков</div>'
+                        : dayLessons.map(l => `
+                            <div class="lesson-card ${l.completed ? 'completed' : ''}">
+                                <div class="lesson-info">
+                                    <span class="lesson-time">${l.time} ${l.completed ? '✓' : ''}</span>
+                                    <span class="lesson-student">${l.student_name || 'Студент'} (${l.rate || 0}₴)</span>
+                                </div>
+                                <div class="lesson-actions">
+                                    ${zoomUrl ? `<a href="${zoomUrl}" target="_blank" class="btn-zoom-icon">🎥 Zoom</a>` : ''}
+                                    <button class="btn-sm ${l.completed ? 'btn-danger-sm' : 'btn-success-sm'}" onclick="toggleLessonStatus(${l.id})">
+                                        ${l.completed ? '↩' : '✓'}
+                                    </button>
+                                    <button class="btn-sm btn-danger-sm" onclick="deleteLesson(${l.id})">✕</button>
+                                </div>
+                            </div>
+                        `).join('');
+
+                    weekGridEl.innerHTML += `
+                        <div class="day-column ${isToday ? 'is-today' : ''}">
+                            <div class="day-header">
+                                <span>${formattedDate} ${isToday ? '• Сегодня' : ''}</span>
+                                <span>${dayLessons.length} ур.</span>
+                            </div>
+                            <div class="lessons-list">
+                                ${lessonsHtml}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('completedLessonsCount').innerText = `${completedCount} / ${lessons.length}`;
+                document.getElementById('todayLessonsCount').innerText = `${todayLessonsCountVal}`;
+                document.getElementById('totalStudentsCount').innerText = `${students.length}`;
+                document.getElementById('earnedIncome').innerText = `${earnedIncomeVal} ₴`;
+            } catch (err) {
+                console.error("Render Error:", err);
+            }
+        }
+
         async function loadSupabaseData() {
             if (!db) return;
             try {
@@ -699,206 +870,14 @@
                 updateAppTitle();
                 render();
             } catch (err) {
-                console.error("Ошибка Supabase:", err);
+                console.error("Ошибка загрузки данных:", err);
             }
         }
 
-        function updateAppTitle() {
-            document.getElementById('appTitle').innerText = teacherName ? `${teacherName}'s English School` : `English School`;
-        }
-
-        async function saveSettings() {
-            const inputName = document.getElementById('teacherNameInput').value.trim();
-            const inputZoom = document.getElementById('zoomUrl').value.trim();
-
-            if (inputName !== teacherName) {
-                teacherName = inputName;
-                if (db) await db.from('config').upsert({ key: 'teacher_name', value: teacherName });
-            }
-
-            if (inputZoom !== zoomUrl) {
-                zoomUrl = inputZoom;
-                if (db) await db.from('config').upsert({ key: 'zoom_url', value: zoomUrl });
-            }
-
-            updateAppTitle();
-            document.getElementById('settingsBar').classList.remove('active');
-            render();
-        }
-
-        async function addStudent() {
-            const name = document.getElementById('studentName').value.trim();
-            const rate = parseFloat(document.getElementById('studentRate').value);
-            if (!name || isNaN(rate)) return alert('Заполните имя и ставку!');
-
-            if (db) {
-                const { data } = await db.from('students').insert([{ name, rate }]).select();
-                if (data) students.push(data[0]);
-            } else {
-                students.push({ id: Date.now(), name, rate });
-            }
-            document.getElementById('studentName').value = '';
-            document.getElementById('studentRate').value = '';
-            render();
-        }
-
-        async function deleteStudent(id) {
-            if (db) await db.from('students').delete().eq('id', id);
-            students = students.filter(s => s.id !== id);
-            render();
-        }
-
-        async function addLesson() {
-            const dateVal = document.getElementById('lessonDate').value;
-            const timeVal = document.getElementById('lessonTime').value;
-            const studentId = parseInt(document.getElementById('lessonStudentSelect').value);
-            if (!dateVal || !timeVal || !studentId) return alert('Заполните дату, время и выберите студента!');
-
-            const student = students.find(s => s.id === studentId);
-            const newLesson = {
-                day: dateVal,
-                lesson_date: dateVal,
-                time: timeVal,
-                student_name: student.name,
-                rate: student.rate,
-                completed: false
-            };
-
-            if (db) {
-                const { data } = await db.from('lessons').insert([newLesson]).select();
-                if (data) lessons.push(data[0]);
-            } else {
-                lessons.push({ ...newLesson, id: Date.now() });
-            }
-            render();
-        }
-
-        async function toggleLessonStatus(id) {
-            const lesson = lessons.find(l => l.id === id);
-            if (lesson) {
-                lesson.completed = !lesson.completed;
-                if (db) await db.from('lessons').update({ completed: lesson.completed }).eq('id', id);
-                render();
-            }
-        }
-
-        async function deleteLesson(id) {
-            if (db) await db.from('lessons').delete().eq('id', id);
-            lessons = lessons.filter(l => l.id !== id);
-            render();
-        }
-
-        function getCurrentWeekDates() {
-            const now = new Date();
-            const currentDay = now.getDay();
-            const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
-            
-            const monday = new Date(now);
-            monday.setDate(now.getDate() + distanceToMonday);
-
-            const weekDates = [];
-            for (let i = 0; i < 7; i++) {
-                const d = new Date(monday);
-                d.setDate(monday.getDate() + i);
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                weekDates.push(`${year}-${month}-${day}`);
-            }
-            return weekDates;
-        }
-
-        function render() {
-            // Студенты
-            document.getElementById('studentsList').innerHTML = students.map(s => `
-                <div class="student-chip">
-                    <span><b>${s.name}</b> (${s.rate}₴)</span>
-                    <span class="del-btn" onclick="deleteStudent(${s.id})">✕</span>
-                </div>
-            `).join('');
-
-            const studentSelectEl = document.getElementById('lessonStudentSelect');
-            studentSelectEl.innerHTML = '<option value="">Выберите студента</option>' + 
-                students.map(s => `<option value="${s.id}">${s.name} (${s.rate} ₴)</option>`).join('');
-
-            // Расписание
-            const weekGridEl = document.getElementById('weekGrid');
-            weekGridEl.innerHTML = '';
-
-            let earnedIncomeVal = 0;
-            let completedCount = 0;
-            let todayLessonsCountVal = 0;
-
-            const now = new Date();
-            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
-            const groupedLessons = {};
-            lessons.forEach(l => {
-                const dateKey = l.lesson_date || l.day || todayStr;
-                if (!groupedLessons[dateKey]) groupedLessons[dateKey] = [];
-                groupedLessons[dateKey].push(l);
-
-                if (l.completed) {
-                    earnedIncomeVal += l.rate;
-                    completedCount++;
-                }
-            });
-
-            const weekDates = getCurrentWeekDates();
-            const allDatesSet = new Set([...weekDates, ...Object.keys(groupedLessons)]);
-            const sortedDates = Array.from(allDatesSet).sort();
-
-            sortedDates.forEach(dateKey => {
-                const dayLessons = (groupedLessons[dateKey] || []).sort((a, b) => a.time.localeCompare(b.time));
-                const parts = dateKey.split('-');
-                const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
-
-                const isToday = (dateKey === todayStr);
-                if (isToday) todayLessonsCountVal = dayLessons.length;
-
-                const dayName = daysOfWeek[dateObj.getDay()] || 'Урок';
-                const formattedDate = `${dayName}, ${dateObj.getDate()} ${months[dateObj.getMonth()]}`;
-
-                let lessonsHtml = dayLessons.length === 0 
-                    ? '<div class="no-lessons">Нет уроков</div>'
-                    : dayLessons.map(l => `
-                        <div class="lesson-card ${l.completed ? 'completed' : ''}">
-                            <div class="lesson-info">
-                                <span class="lesson-time">${l.time} ${l.completed ? '✓' : ''}</span>
-                                <span class="lesson-student">${l.student_name || 'Студент'} (${l.rate}₴)</span>
-                            </div>
-                            <div class="lesson-actions">
-                                ${zoomUrl ? `<a href="${zoomUrl}" target="_blank" class="btn-zoom-icon">🎥 Zoom</a>` : ''}
-                                <button class="btn-sm ${l.completed ? 'btn-danger-sm' : 'btn-success-sm'}" onclick="toggleLessonStatus(${l.id})">
-                                    ${l.completed ? '↩' : '✓'}
-                                </button>
-                                <button class="btn-sm btn-danger-sm" onclick="deleteLesson(${l.id})">✕</button>
-                            </div>
-                        </div>
-                    `).join('');
-
-                weekGridEl.innerHTML += `
-                    <div class="day-column ${isToday ? 'is-today' : ''}">
-                        <div class="day-header">
-                            <span>${formattedDate} ${isToday ? '• Сегодня' : ''}</span>
-                            <span>${dayLessons.length} ур.</span>
-                        </div>
-                        <div class="lessons-list">
-                            ${lessonsHtml}
-                        </div>
-                    </div>
-                `;
-            });
-
-            document.getElementById('completedLessonsCount').innerText = `${completedCount} / ${lessons.length}`;
-            document.getElementById('todayLessonsCount').innerText = `${todayLessonsCountVal}`;
-            document.getElementById('totalStudentsCount').innerText = `${students.length}`;
-            document.getElementById('earnedIncome').innerText = `${earnedIncomeVal} ₴`;
-        }
-
-        // Рендерим интерфейс сходу
+        // 1. Сразу железно отрисовываем структуру 7 дней
         render();
-        // Грузим из базы
+
+        // 2. В фоновом режиме подгружаем данные
         loadSupabaseData();
     </script>
 </body>
