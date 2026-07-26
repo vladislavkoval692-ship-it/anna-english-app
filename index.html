@@ -118,33 +118,7 @@
             text-transform: uppercase;
         }
 
-        /* --- ПОЛЯ ВВОДА С МИКРОФОНОМ --- */
-        .input-with-mic {
-            position: relative;
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
-
-        .input-with-mic input {
-            padding-right: 40px !important;
-        }
-
-        .mic-btn {
-            position: absolute;
-            right: 6px;
-            background: transparent;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
+        /* КНОПКА МИКРОФОНА РЯДОМ С ОСНОВНЫМИ КНОПКАМИ */
         .mic-btn-action {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -156,6 +130,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s ease;
         }
 
         .listening {
@@ -510,26 +485,9 @@
             font-weight: 600;
         }
 
-        /* --- PAYWALL MODAL --- */
-        .paywall-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        .paywall-title {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--gold);
-            margin-bottom: 8px;
-        }
-
-        .paywall-desc {
-            font-size: 13px;
-            color: var(--text-sub);
-            line-height: 1.5;
-            margin-bottom: 18px;
-        }
-
+        .paywall-icon { font-size: 48px; margin-bottom: 10px; }
+        .paywall-title { font-size: 20px; font-weight: 800; color: var(--gold); margin-bottom: 8px; }
+        .paywall-desc { font-size: 13px; color: var(--text-sub); line-height: 1.5; margin-bottom: 18px; }
         .paywall-features {
             text-align: left;
             background: var(--bg);
@@ -542,23 +500,10 @@
             flex-direction: column;
             gap: 8px;
         }
-
-        .paywall-price {
-            font-size: 22px;
-            font-weight: 900;
-            color: var(--text-main);
-            margin-bottom: 14px;
-        }
-
+        .paywall-price { font-size: 22px; font-weight: 900; color: var(--text-main); margin-bottom: 14px; }
         .btn-gold {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-            font-weight: 800;
-            padding: 14px;
-            border-radius: 14px;
-            width: 100%;
-            font-size: 14px;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+            color: white; font-weight: 800; padding: 14px; border-radius: 14px; width: 100%; font-size: 14px;
         }
     </style>
 </head>
@@ -576,10 +521,7 @@
     <div class="settings-bar" id="settingsBar">
         <div class="settings-field">
             <label>Имя преподавателя</label>
-            <div class="input-with-mic">
-                <input type="text" id="teacherNameInput" placeholder="Укажите ваше имя...">
-                <button class="mic-btn" onclick="startVoiceInput('teacherNameInput', this)">🎙️</button>
-            </div>
+            <input type="text" id="teacherNameInput" placeholder="Укажите ваше имя...">
         </div>
         <div class="settings-field">
             <label>Ссылка на Zoom</label>
@@ -610,24 +552,24 @@
         </div>
     </div>
 
+    <!-- БЛОК ДОБАВЛЕНИЯ СТУДЕНТА (Микрофон перенесен к кнопке) -->
     <div class="section-box">
         <div class="section-header-flex">
             <div class="section-title">Студенты</div>
             <div class="limit-info-tag" id="limitTag">Лимит: 0 / 3</div>
         </div>
         <div class="form-grid">
-            <div class="input-with-mic">
-                <input type="text" id="studentName" placeholder="Имя">
-                <button class="mic-btn" onclick="startVoiceInput('studentName', this)">🎙️</button>
-            </div>
+            <input type="text" id="studentName" placeholder="Имя">
             <input type="number" id="studentRate" placeholder="Ставка (₴)">
         </div>
         <div class="form-actions">
             <button class="btn-primary" onclick="addStudent()">Добавить студента</button>
+            <button class="mic-btn-action" onclick="startVoiceStudentAdd(this)" title="Надиктовать студента">🎙️</button>
         </div>
         <div class="students-list" id="studentsList"></div>
     </div>
 
+    <!-- БЛОК ЗАПЛАНИРОВАТЬ УРОК (Микрофон рядом с кнопкой) -->
     <div class="section-box">
         <div class="section-title" style="margin-bottom: 12px;">Запланировать урок</div>
         <div class="form-grid">
@@ -648,7 +590,6 @@
     <div class="section-title" style="margin: 18px 2px 10px 2px;">Расписание занятий</div>
     <div class="week-container" id="weekGrid"></div>
 
-    <!-- МОДАЛКА СПИСКА УЧЕНИКОВ -->
     <div class="modal-overlay" id="studentsModal" onclick="closeStudentsModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -659,7 +600,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛКА ПОДПИСКИ (PAYWALL) -->
     <div class="modal-overlay" id="paywallModal" onclick="closePaywallModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div style="text-align: right;">
@@ -720,8 +660,8 @@
 
         document.getElementById('lessonDate').valueAsDate = new Date();
 
-        /* --- ГОЛОСОВОЙ ВВОД ДЛЯ ПРОСТЫХ ПОЛЕЙ --- */
-        function startVoiceInput(inputId, btnEl) {
+        /* --- ГОЛОСОВОЙ ВВОД ДЛЯ ДОБАВЛЕНИЯ СТУДЕНТА (Имя + Ставка) --- */
+        function startVoiceStudentAdd(btnEl) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) return alert('Голосовой ввод не поддерживается браузером.');
 
@@ -733,9 +673,16 @@
 
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript;
-                const inputEl = document.getElementById(inputId);
-                if (inputEl) {
-                    inputEl.value = text.charAt(0).toUpperCase() + text.slice(1);
+                
+                // Вытаскиваем цифры (ставку), всё остальное считаем именем
+                const numbers = text.match(/\d+/g);
+                if (numbers) {
+                    document.getElementById('studentRate').value = numbers[0];
+                }
+                
+                const nameCleaned = text.replace(/\d+/g, '').replace(/(рублей|гривен|ставка|руб|грн)/gi, '').trim();
+                if (nameCleaned) {
+                    document.getElementById('studentName').value = nameCleaned.charAt(0).toUpperCase() + nameCleaned.slice(1);
                 }
             };
 
@@ -758,13 +705,13 @@
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript.toLowerCase();
                 
-                // 1. Поиск студента в списке
+                // 1. Поиск студента
                 const matchedStudent = students.find(s => text.includes(s.name.toLowerCase()));
                 if (matchedStudent) {
                     document.getElementById('lessonStudentSelect').value = matchedStudent.id;
                 }
 
-                // 2. Поиск времени (например "в 15:00", "14 00", "в 9 утра")
+                // 2. Поиск времени
                 const timeMatch = text.match(/(\d{1,2})[:\s]?(\d{2})?/);
                 if (timeMatch) {
                     let hours = parseInt(timeMatch[1]);
@@ -775,7 +722,7 @@
                     }
                 }
 
-                // 3. Поиск даты (сегодня, завтра, дни недели)
+                // 3. Поиск даты
                 const now = new Date();
                 if (text.includes('завтра')) {
                     now.setDate(now.getDate() + 1);
@@ -839,7 +786,7 @@
         }
 
         function subscribePro() {
-            alert('Здесь будет переход к оплате (например через Telegram Stars, LiqPay или Stripe).');
+            alert('Переход к оплате.');
         }
 
         function updateAppTitle() {
