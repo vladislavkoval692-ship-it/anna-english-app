@@ -119,7 +119,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* Стильный Segmented Control для языка */
+        /* ЧИСТЫЙ И СТИЛЬНЫЙ СЕКТОР ЯЗЫКА */
         .lang-selector {
             display: flex;
             background: var(--bg);
@@ -134,8 +134,8 @@
             background: transparent;
             color: var(--text-sub);
             border: none;
-            padding: 8px 10px;
-            font-size: 13px;
+            padding: 8px 4px;
+            font-size: 12px;
             font-weight: 600;
             border-radius: 9px;
             cursor: pointer;
@@ -143,7 +143,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            text-align: center;
         }
 
         .lang-btn.active {
@@ -555,19 +555,19 @@
         </div>
     </header>
 
-    <!-- НАСТРОЙКИ С КРАСИВЫМИ КНОПКАМИ ЯЗЫКА -->
+    <!-- НАСТРОЙКИ С ЛАКОНИЧНЫМИ КНОПКАМИ YАЗЫКА -->
     <div class="settings-bar" id="settingsBar">
         <div class="settings-field">
             <label id="lblLang">Язык / Language</label>
             <div class="lang-selector">
                 <button class="lang-btn active" data-lang="ru" onclick="selectLang('ru')">
-                    <span>🇷🇺</span> Русский
+                    Русский
                 </button>
                 <button class="lang-btn" data-lang="uk" onclick="selectLang('uk')">
-                    <span>🇺🇦</span> Укр
+                    Українська
                 </button>
                 <button class="lang-btn" data-lang="en" onclick="selectLang('en')">
-                    <span>🇬🇧</span> Eng
+                    English
                 </button>
             </div>
         </div>
